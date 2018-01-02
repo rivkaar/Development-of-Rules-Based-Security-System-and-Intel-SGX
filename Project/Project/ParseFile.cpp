@@ -5,6 +5,8 @@
 #include <queue>
 
 bool g_isComment = false;
+bool isMain = false;
+std::queue<char> q;
 std::list<WordData*> g_wordsList;
 std::map<std::string, std::string> g_executeFilesFullPath;
 std::list<std::string> g_executeFilesList;
@@ -40,8 +42,7 @@ void findWordInLine(std::string line, int lineNum, std::ofstream* outputFile)
 	std::string newLine = "";
 	bool isSuspiciousFuncFound = false;
 	int len = line.length();
-	std::queue<char> q;
-	bool isMain = false;
+	
 	for (int i = 0; i < len; i++)
 	{
 		char c = line.at(i);
@@ -68,11 +69,23 @@ void findWordInLine(std::string line, int lineNum, std::ofstream* outputFile)
 					*outputFile << "	{\n";
 					*outputFile << "		return -1; \n";
 					*outputFile << "	}\n";
+					isMain = false;
 				}
 			}
-			else if (isMain && c == '{')
+			else if (isMain && c == '{' )
 			{
 				q.push('{');
+				if (q.size() == 1) {
+					*outputFile << line + "\n";
+					*outputFile << "    sgx_status_t res = SGX_SUCCESS;\n";
+					*outputFile << "	// Create the Enclave with above launch token.\n";
+					*outputFile << "	res = createEnclave(&eid); \n";
+					*outputFile << "    if (res != SGX_SUCCESS)\n	{\n";
+					*outputFile << "		printf(\"App: error %#x, failed to create enclave.\", res); \n";
+					*outputFile << "		return -1; \n	}\n";
+					return;
+				}
+				
 			}
 
 			if (g_dictionary.count(str) > 0)
@@ -81,20 +94,14 @@ void findWordInLine(std::string line, int lineNum, std::ofstream* outputFile)
 				WordData* data = new WordData(lineNum, charNum, str);
 				g_wordsList.push_back(data);
 				replaceLineInOutputFile(line, str, charNum, outputFile);
-				isSuspiciousFuncFound = true;
-				if (str.compare("main") == 0)
-				{
-					isMain = true;
-					q.push('{');
-					*outputFile << line + "\n";
-					*outputFile << "sgx_status_t res = SGX_SUCCESS;\n";
-					*outputFile << "	// Create the Enclave with above launch token.\n";
-					*outputFile << "	res = createEnclave(&eid); \n";
-					*outputFile << "if (res != SGX_SUCCESS)\n{\n";
-					*outputFile << "	printf(\"App: error %#x, failed to create enclave.\n\", res); \n";
-					*outputFile << "	return -1; \n}\n";
-				}
+				isSuspiciousFuncFound = true;		
 				return;
+			}
+			if (str.compare("main") == 0)
+			{
+				isMain = true;
+			//	q.push('{');
+				
 			}
 		}
 		else if (c == '#')
@@ -123,7 +130,10 @@ void findWordInLine(std::string line, int lineNum, std::ofstream* outputFile)
 			}
 			str += line.at(i);
 		}
-	}
+		if(c == ' ')
+			str = "";
+	} 
+
 	if (!isSuspiciousFuncFound)
 	{
 		*outputFile << line + "\n";
