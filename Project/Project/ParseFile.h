@@ -28,9 +28,9 @@ extern std::list<WordData*> g_wordsList;
 extern std::list<std::string> g_executeFilesList;
 extern std::map<std::string, std::string> g_executeFilesFullPath;
 
-void parseFile(std::map<std::string, std::string> dictionary, std::string inputFilePath, std::string outputFilePath);
-void findWordInLine(std::string line, int lineNum, std::ofstream* outputFile);
-void findAllExecuteFiles(std::string executeFilesListPath);
+void parseFile(std::map<std::string, std::string> dictionary, std::string sourceFilePath);
+void findWordInLine(std::string line, int lineNum, std::ofstream* tempFile);
+void copyToSourceFile(std::string sourceFilePath);
 void deleteLists();
-void replaceLineInOutputFile(std::string line, std::string str, int charNum, std::ofstream* outputFile);
+void replaceLineInTempFile(std::string line, std::string str, int charNum, std::ofstream* tempFile);
 #endif // !_PARSE_FILE_H

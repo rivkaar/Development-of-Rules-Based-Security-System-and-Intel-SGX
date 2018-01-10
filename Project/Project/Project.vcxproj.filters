@@ -24,12 +24,18 @@
     <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="SearchExe.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ParseFile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Dictionary.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SearchExe.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

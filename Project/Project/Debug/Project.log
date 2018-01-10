@@ -1,6 +1,4 @@
-﻿  ParseFile.cpp
-c:\users\user\documents\visual studio 2015\projects\project\project\parsefile.cpp(283): warning C4477: 'printf' : format string '%s' requires an argument of type 'char *', but variadic argument 1 has type 'std::string'
-c:\users\user\documents\visual studio 2015\projects\project\project\parsefile.cpp(293): warning C4018: '<': signed/unsigned mismatch
-c:\users\user\documents\visual studio 2015\projects\project\project\parsefile.cpp(312): warning C4477: 'printf' : format string '%s' requires an argument of type 'char *', but variadic argument 1 has type 'std::string'
+﻿  SearchExe.cpp
+  Main.obj : /DEBUG:FASTLINK is not supported when managed code is present; restarting link with /DEBUG:FULL
   Project.vcxproj -> C:\Users\user\Documents\Visual Studio 2015\Projects\Project\Debug\Project.exe
   Project.vcxproj -> C:\Users\user\Documents\Visual Studio 2015\Projects\Project\Debug\Project.pdb (Partial PDB)

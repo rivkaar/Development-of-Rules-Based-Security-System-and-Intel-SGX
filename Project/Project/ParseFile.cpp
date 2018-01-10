@@ -4,12 +4,12 @@
 #include <string>
 #include <queue>
 
+std::string TEMP_FILE = "C:/Users/user/Desktop/tempFile.c";
 bool g_isComment = false;
 bool isMain = false;
 std::queue<char> q;
 std::list<WordData*> g_wordsList;
-std::map<std::string, std::string> g_executeFilesFullPath;
-std::list<std::string> g_executeFilesList;
+
 
 WordData::WordData(int lineNum, int charNum, std::string word)
 {
@@ -31,18 +31,15 @@ std::string WordData::getWord()
 	return word;
 }
 
-/*
-* this function
-*
-*/
 
-void findWordInLine(std::string line, int lineNum, std::ofstream* outputFile)
+void findWordInLine(std::string line, int lineNum, std::ofstream* tempFile)
 {
+
 	std::string str = "";
 	std::string newLine = "";
 	bool isSuspiciousFuncFound = false;
 	int len = line.length();
-	
+
 	for (int i = 0; i < len; i++)
 	{
 		char c = line.at(i);
@@ -65,27 +62,27 @@ void findWordInLine(std::string line, int lineNum, std::ofstream* outputFile)
 				q.pop();
 				if (isMain && q.size() == 0)
 				{
-					*outputFile << "	if (SGX_SUCCESS != sgx_destroy_enclave(eid))\n";
-					*outputFile << "	{\n";
-					*outputFile << "		return -1; \n";
-					*outputFile << "	}\n";
+					*tempFile << "	if (SGX_SUCCESS != sgx_destroy_enclave(eid))\n";
+					*tempFile << "	{\n";
+					*tempFile << "		return -1; \n";
+					*tempFile << "	}\n";
 					isMain = false;
 				}
 			}
-			else if (isMain && c == '{' )
+			else if (isMain && c == '{')
 			{
 				q.push('{');
 				if (q.size() == 1) {
-					*outputFile << line + "\n";
-					*outputFile << "    sgx_status_t res = SGX_SUCCESS;\n";
-					*outputFile << "	// Create the Enclave with above launch token.\n";
-					*outputFile << "	res = createEnclave(&eid); \n";
-					*outputFile << "    if (res != SGX_SUCCESS)\n	{\n";
-					*outputFile << "		printf(\"App: error %#x, failed to create enclave.\", res); \n";
-					*outputFile << "		return -1; \n	}\n";
+					*tempFile << line + "\n";
+					*tempFile << "    sgx_status_t res = SGX_SUCCESS;\n";
+					*tempFile << "	// Create the Enclave with above launch token.\n";
+					*tempFile << "	res = createEnclave(&eid); \n";
+					*tempFile << "    if (res != SGX_SUCCESS)\n	{\n";
+					*tempFile << "		printf(\"App: error %#x, failed to create enclave.\", res); \n";
+					*tempFile << "		return -1; \n	}\n";
 					return;
 				}
-				
+
 			}
 
 			if (g_dictionary.count(str) > 0)
@@ -93,15 +90,15 @@ void findWordInLine(std::string line, int lineNum, std::ofstream* outputFile)
 				int charNum = i - str.length();
 				WordData* data = new WordData(lineNum, charNum, str);
 				g_wordsList.push_back(data);
-				replaceLineInOutputFile(line, str, charNum, outputFile);
-				isSuspiciousFuncFound = true;		
+				replaceLineInTempFile(line, str, charNum, tempFile);
+				isSuspiciousFuncFound = true;
 				return;
 			}
 			if (str.compare("main") == 0)
 			{
 				isMain = true;
-			//	q.push('{');
-				
+				//	q.push('{');
+
 			}
 		}
 		else if (c == '#')
@@ -130,26 +127,25 @@ void findWordInLine(std::string line, int lineNum, std::ofstream* outputFile)
 			}
 			str += line.at(i);
 		}
-		if(c == ' ')
+		if (c == ' ')
 			str = "";
-	} 
+	}
 
 	if (!isSuspiciousFuncFound)
 	{
-		*outputFile << line + "\n";
+		*tempFile << line + "\n";
 	}
 }
 
-void parseFile(std::map<std::string, std::string> dictionary, std::string inputFilePath, std::string outputFilePath)
+void parseFile(std::map<std::string, std::string> dictionary, std::string sourceFilePath)
 {
-	std::ifstream inputFile;
-	std::ofstream outputFile;
-	outputFile.open(outputFilePath);
-	inputFile.open(inputFilePath);
+	std::ifstream sourceFile;
+	std::ofstream tempFile;
+	tempFile.open(TEMP_FILE);
+	sourceFile.open(sourceFilePath);
 	std::string line;
 	int lineNum = 0;
-	std::string str = "// test_after.c \n";
-	str += "#pragma check_stack(off)\n";
+	std::string str = "#pragma check_stack(off)\n";
 	str += "#include \"stdafx.h\"\n";
 	str += "#include \"sgx_urts.h\"\n";
 	str += "#include \"SecureFunctions_u.h\"\n";
@@ -173,90 +169,32 @@ void parseFile(std::map<std::string, std::string> dictionary, std::string inputF
 	str += "	return ret;\n}\n";
 	str += "sgx_enclave_id_t eid;\n\n";
 
-	if (inputFile.is_open() && outputFile.is_open())
+	if (sourceFile.is_open() && tempFile.is_open())
 	{
-		outputFile << str;
-		while (getline(inputFile, line))
+		tempFile << str;
+		while (getline(sourceFile, line))
 		{
-			findWordInLine(line, lineNum, &outputFile);
+			findWordInLine(line, lineNum, &tempFile);
 			lineNum++;
 		}
+
 	}
 
 	else
 	{
-		if (inputFile.is_open())
+		if (sourceFile.is_open())
 		{
-			std::cout << "Unable to open output file";
+			std::cout << "Unable to open temp file";
 		}
 		else
 		{
-			std::cout << "Unable to open input file";
+			std::cout << "Unable to open source file";
 		}
 	}
-	inputFile.close();
-	outputFile.close();
-}
+	sourceFile.close();
+	tempFile.close();
 
-void findAllExecuteFiles(std::string executeFilesListPath)
-{
-	std::ifstream myfile;
-	myfile.open(executeFilesListPath);
-	std::string line;
-	std::string path[50];
-	if (myfile.is_open())
-	{
-		while (getline(myfile, line))
-		{
-			std::string str = "";
-			int len = line.length();
-			int strNum = 0;
-			for (int i = 0; i < len; i++)
-			{
-				char c = line.at(i);
-				if (c == '\\')
-				{
-					path[strNum] = str;
-					str = "";
-					strNum++;
-				}
-				else
-				{
-					str += c;
-				}
-				if (i == (len - 1))
-				{
-					path[strNum] = str;
-					str = "";
-					strNum++;
-				}
-			}
-
-			std::string fullPath = "";
-			std::string fileName;
-			for (int i = 0; i < strNum; i++)
-			{
-				fullPath += path[i];
-				if (i < (strNum - 1))
-				{
-					fullPath += '\\';
-				}
-				else
-				{
-					fileName = path[strNum];
-				}
-			}
-			g_executeFilesFullPath[fileName] = fullPath;
-			g_executeFilesList.push_back(fileName);
-		}
-		myfile.close();
-	}
-
-	else
-	{
-		std::cout << "Unable to open file";
-	}
-	myfile.close();
+	copyToSourceFile("C:/Users/user/Desktop/sourceFile.c"); //Copies all content back to the source file
 }
 
 
@@ -312,7 +250,7 @@ std::list<std::string> getFuncParams(std::string func)
 			printf("%s\n", p);
 			p = "";
 		}
-		else if (q.size() != 0)	
+		else if (q.size() != 0)
 		{
 			p += c;
 		}
@@ -328,11 +266,41 @@ std::list<std::string> getFuncParams(std::string func)
 	return params;
 }
 
-void replaceLineInOutputFile(std::string line, std::string str, int charNum, std::ofstream* outputFile)
+void replaceLineInTempFile(std::string line, std::string str, int charNum, std::ofstream* tempFile)
 {
 	std::list<std::string> params = getFuncParams(line);
 	std::string newLine = line.substr(0, charNum);
 	newLine += getNewCallFunction(str, params) + ";\n";
-	*outputFile << "//" + line + "\n";
-	*outputFile << newLine;
+	*tempFile << "//" + line + "\n";
+	*tempFile << newLine;
+}
+
+void copyToSourceFile(std::string sourceFilePath)
+{
+	std::ifstream tempFile;
+	std::ofstream sourceFile;
+	tempFile.open(TEMP_FILE);
+	sourceFile.open(sourceFilePath);
+	std::string line;
+	if (sourceFile.is_open() && tempFile.is_open())
+	{
+		while (getline(tempFile, line))
+		{
+			sourceFile << line + "\n";
+		}
+	}
+	else
+	{
+		if (sourceFile.is_open())
+		{
+			std::cout << "Unable to open temp file";
+		}
+		else
+		{
+			std::cout << "Unable to open source file";
+		}
+	}
+
+	sourceFile.close();
+	tempFile.close();
 }
