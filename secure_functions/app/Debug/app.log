@@ -1,0 +1,9 @@
+﻿  app.cpp
+app.cpp(46): warning #267: the format string requires additional arguments
+    	printf("My stack looks like:\n%p\n%p\n%p\n%p\n%p\n% p\n\n");
+    	                                                          ^
+  
+app.cpp(53): warning #267: the format string requires additional arguments
+    	printf("Now the stack looks like:\n%p\n%p\n%p\n%p\n%p\n%p\n\n");
+    	                                                              ^
+  
