@@ -1,9 +1,8 @@
-﻿  Dictionary.cpp
-  Main.cpp
+﻿  Main.cpp
   ParseFile.cpp
 ParseFile.cpp(41): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
 ParseFile.cpp(90): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-ParseFile.cpp(221): warning C4477: 'printf' : format string '%s' requires an argument of type 'char *', but variadic argument 1 has type 'std::string'
-ParseFile.cpp(250): warning C4477: 'printf' : format string '%s' requires an argument of type 'char *', but variadic argument 1 has type 'std::string'
+ParseFile.cpp(220): warning C4477: 'printf' : format string '%s' requires an argument of type 'char *', but variadic argument 1 has type 'std::string'
+ParseFile.cpp(254): warning C4477: 'printf' : format string '%s' requires an argument of type 'char *', but variadic argument 1 has type 'std::string'
   Generating Code...
   prog.vcxproj -> C:\Users\ליבוביץ\Desktop\yy\build\Release\prog.exe

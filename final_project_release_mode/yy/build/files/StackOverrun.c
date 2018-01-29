@@ -1,12 +1,11 @@
 #pragma check_stack(off)
-#include "stdafx.h"
 #include "sgx_urts.h"
-#include "SecureFunctions_u.h"
+#include "secure_functions_u.h"
 #include <tchar.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#define ENCLAVE_FILE _T("SecureFunctions.signed.dll")
+#define ENCLAVE_FILE _T("secure_functions.signed.dll")
 using namespace std;
 /* OCall functions */
 void ocall_print_string(const char *str)
@@ -37,37 +36,29 @@ sgx_enclave_id_t eid;
 
 // ------------------- Function Prototypes --------------------
 
-int32_t bar(void);
-int32_t foo(char * str2);
+int32_t _bar(void);
+int32_t _foo(char * str2);
 
 // ------------------------ Functions -------------------------
 
-// Address range: 0x80484fd - 0x804855b
-int32_t foo(char * str2) {
-    int32_t v1 = *(int32_t *)20; // 0x804850a
-    int32_t v2;
-    printf("My stack looks like:\n%p\n%p\n%p\n%p\n%p\n% p\n\n", (char *)v2, str2);
+// Address range: 0x401460 - 0x40149d
+int32_t _foo(char * str2) {
+    int32_t v1;
+    printf("My stack looks like:\n%p\n%p\n%p\n%p\n%p\n% p\n\n");
     int32_t str;
 //    strcpy((char *)&str, str2);
-    enclaveStrcpy(eid, (char *,(char *&str, str2);
+    enclaveStrcpy(eid, (char *)&str, str2);
     puts((char *)&str);
-    printf("Now the stack looks like:\n%p\n%p\n%p\n%p\n%p\n%p\n\n", str2, str2);
-    int32_t v3 = *(int32_t *)20; // 0x804854d
-    if (v3 != v1) {
-        // 0x8048555
-        // branch -> 0x804855a
-    }
-    // 0x804855a
-    return v3 ^ v1;
+    return printf("Now the stack looks like:\n%p\n%p\n%p\n%p\n%p\n%p\n\n", str2);
 }
 
-// Address range: 0x804855c - 0x804856f
-int32_t bar(void) {
-    // 0x804855c
+// Address range: 0x40149e - 0x4014b2
+int32_t _bar(void) {
+    // 0x40149e
     return puts("Augh! I've been hacked!");
 }
 
-// Address range: 0x8048570 - 0x80485ff
+// Address range: 0x4014b3 - 0x40153f
 int main(int argc, char ** argv) {
     sgx_status_t res = SGX_SUCCESS;
 	// Create the Enclave with above launch token.
@@ -77,24 +68,25 @@ int main(int argc, char ** argv) {
 		printf("App: error %#x, failed to create enclave.", res); 
 		return -1; 
 	}
-    // 0x8048570
-    printf("Address of foo = %p\n", (int32_t *)foo);
-    printf("Address of bar = %p\n", (int32_t *)bar);
-    int32_t * str = (int32_t *)((int32_t)argv + 4); // 0x80485a7_0
+    // 0x4014b3
+    printf("Address of foo = %p\n", (int32_t *)_foo);
+    printf("Address of bar = %p\n", (int32_t *)_bar);
+    int32_t * str = (int32_t *)((int32_t)argv + 4); // 0x4014ef_0
     printf("strlen of input string is: %i\n", strlen((char *)*str));
     int32_t result;
     if (argc == 2) {
-        // 0x80485da
-        foo((char *)*str);
+        // 0x401522
+        _foo((char *)*str);
         result = 0;
-        // branch -> 0x80485ef
+        // branch -> 0x401537
     } else {
-        // 0x80485c7
+        // 0x40150f
         puts("Please supply a string as an argument!");
         result = -1;
-        // branch -> 0x80485ef
+        // branch -> 0x401537
     }
-    // 0x80485ef
+    // 0x401537
+	system("pause");
     return result;
 	if (SGX_SUCCESS != sgx_destroy_enclave(eid))
 	{
@@ -102,9 +94,12 @@ int main(int argc, char ** argv) {
 	}
 }
 
+// --------------- Statically Linked Functions ----------------
+
+// void ___main(void);
+
 // --------------- Dynamically Linked Functions ---------------
 
-// void __stack_chk_fail(void);
 // int printf(const char * restrict format, ...);
 // int puts(const char * s);
 // char * strcpy(char * restrict dest, const char * restrict src);
@@ -112,7 +107,8 @@ int main(int argc, char ** argv) {
 
 // --------------------- Meta-Information ---------------------
 
-// Detected compiler/packer: gcc (4.8.2)
+// Detected compiler/packer: gcc (6.3.0)
+// Detected language: C
 // Detected functions: 3
 // Decompiler release: v2.2.1 (2016-09-07)
-// Decompilation date: 2018-01-10 20:31:17
+// Decompilation date: 2018-01-28 21:09:28

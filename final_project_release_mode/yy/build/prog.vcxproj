@@ -135,7 +135,7 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR="Release";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>KEY="834c39c3-3c97-469a-8433-0dc159038a8e";WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR="Release";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <DebugInformationFormat>
       </DebugInformationFormat>
@@ -311,6 +311,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClCompile Include="C:\Users\ליבוביץ\Desktop\yy\prog.cpp">
       <AdditionalUsingDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">prog.h</AdditionalUsingDirectories>
     </ClCompile>
+    <ClCompile Include="Compile.cpp" />
     <ClCompile Include="Dictionary.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="ParseFile.cpp" />
@@ -322,6 +323,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Compile.h" />
     <ClInclude Include="Dictionary.h" />
     <ClInclude Include="ParseFile.h" />
     <ClInclude Include="prog.h" />

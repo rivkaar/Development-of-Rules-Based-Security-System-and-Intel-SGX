@@ -1,0 +1,18 @@
+﻿  Creating proxy/bridge routines
+  Secure_Functions.cpp
+  Secure_Functions_t.c
+     Creating library C:\Users\ליבוביץ\Desktop\final_project_release_mode\yy\build\x64\Release\Secure_Functions.lib and object C:\Users\ליבוביץ\Desktop\final_project_release_mode\yy\build\x64\Release\Secure_Functions.exp
+  Secure_Functions.vcxproj -> C:\Users\ליבוביץ\Desktop\final_project_release_mode\yy\build\x64\Release\Secure_Functions.dll
+  The required memory is 0x169000.
+  Succeed.
+  <EnclaveConfiguration>
+      <ProdID>0</ProdID>
+      <ISVSVN>0</ISVSVN>
+      <StackMaxSize>0x40000</StackMaxSize>
+      <HeapMaxSize>0x100000</HeapMaxSize>
+      <TCSNum>1</TCSNum>
+      <TCSPolicy>1</TCSPolicy>
+      <DisableDebug>0</DisableDebug>
+      <MiscSelect>0</MiscSelect>
+      <MiscMask>0xFFFFFFFF</MiscMask>
+  </EnclaveConfiguration>

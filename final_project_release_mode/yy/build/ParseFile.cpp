@@ -146,14 +146,13 @@ void parseFile(std::map<std::string, std::string> dictionary, std::string source
 	std::string line;
 	int lineNum = 0;
 	std::string str = "#pragma check_stack(off)\n";
-	str += "#include \"stdafx.h\"\n";
 	str += "#include \"sgx_urts.h\"\n";
-	str += "#include \"SecureFunctions_u.h\"\n";
+	str += "#include \"secure_functions_u.h\"\n";
 	str += "#include <tchar.h>\n";
 	str += "#include <stdint.h>\n";
 	str += "#include <stdio.h>\n";
 	str += "#include <stdlib.h>\n";
-	str += "#define ENCLAVE_FILE _T(\"SecureFunctions.signed.dll\")\n";
+	str += "#define ENCLAVE_FILE _T(\"secure_functions.signed.dll\")\n";
 	str += "using namespace std;\n";
 	str += "/* OCall functions */\n";
 	str += "void ocall_print_string(const char *str)\n{\n";
@@ -227,7 +226,7 @@ std::list<std::string> getFuncParams(std::string func)
 {
 	std::queue<char> q;
 	std::list<std::string> params;
-	std::string p;
+	std::string p = "";
 	for (int i = 0; i < func.length(); i++)
 	{
 		char c = func.at(i);
@@ -239,10 +238,15 @@ std::list<std::string> getFuncParams(std::string func)
 			}
 			q.push(c);
 		}
-		else if (c == ')')
+		else if (c == ')' && q.size() == 1)
 		{
 			params.push_back(p);
 			q.pop();
+		}
+		else if (c == ')' && q.size() > 1)
+		{
+			q.pop();
+			p += c;
 		}
 		else if (c == ',')
 		{
