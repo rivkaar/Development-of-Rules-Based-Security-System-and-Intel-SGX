@@ -1,4 +1,7 @@
-﻿  SearchExe.cpp
+﻿  ParseFile.cpp
+ParseFile.cpp(235): warning C4018: '<': signed/unsigned mismatch
+ParseFile.cpp(254): warning C4477: 'printf' : format string '%s' requires an argument of type 'char *', but variadic argument 1 has type 'std::string'
+ParseFile.cpp(292): warning C4018: '<': signed/unsigned mismatch
   Main.obj : /DEBUG:FASTLINK is not supported when managed code is present; restarting link with /DEBUG:FULL
-  Project.vcxproj -> C:\Users\user\Documents\Visual Studio 2015\Projects\Project\Debug\Project.exe
-  Project.vcxproj -> C:\Users\user\Documents\Visual Studio 2015\Projects\Project\Debug\Project.pdb (Partial PDB)
+  Project.vcxproj -> C:\Users\User\Desktop\project\Development-of-Rules-Based-Security-System-and-Intel-SGX\Project\Debug\Project.exe
+  Project.vcxproj -> C:\Users\User\Desktop\project\Development-of-Rules-Based-Security-System-and-Intel-SGX\Project\Debug\Project.pdb (Partial PDB)

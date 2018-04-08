@@ -7,6 +7,7 @@
 std::string TEMP_FILE = "C:/Users/user/Desktop/tempFile.c";
 bool g_isComment = false;
 bool isMain = false;
+bool replaceSouceFile = false;
 std::queue<char> q;
 std::list<WordData*> g_wordsList;
 
@@ -31,7 +32,8 @@ std::string WordData::getWord()
 	return word;
 }
 
-
+/*The function findWordInLine scans the file 
+  and searches for suspicious actions that appear in the dictionary */
 void findWordInLine(std::string line, int lineNum, std::ofstream* tempFile)
 {
 
@@ -60,7 +62,7 @@ void findWordInLine(std::string line, int lineNum, std::ofstream* tempFile)
 			if (isMain && c == '}')
 			{
 				q.pop();
-				if (isMain && q.size() == 0)
+				if (isMain && q.size() == 0) //add lines in the main for destroy the enclave
 				{
 					*tempFile << "	if (SGX_SUCCESS != sgx_destroy_enclave(eid))\n";
 					*tempFile << "	{\n";
@@ -72,7 +74,7 @@ void findWordInLine(std::string line, int lineNum, std::ofstream* tempFile)
 			else if (isMain && c == '{')
 			{
 				q.push('{');
-				if (q.size() == 1) {
+				if (q.size() == 1) { //add lines in the main for create the enclave
 					*tempFile << line + "\n";
 					*tempFile << "    sgx_status_t res = SGX_SUCCESS;\n";
 					*tempFile << "	// Create the Enclave with above launch token.\n";
@@ -85,19 +87,19 @@ void findWordInLine(std::string line, int lineNum, std::ofstream* tempFile)
 
 			}
 
-			if (g_dictionary.count(str) > 0)
+			if (g_dictionary.count(str) > 0) //Comparing the str with the dictionary
 			{
 				int charNum = i - str.length();
 				WordData* data = new WordData(lineNum, charNum, str);
 				g_wordsList.push_back(data);
 				replaceLineInTempFile(line, str, charNum, tempFile);
 				isSuspiciousFuncFound = true;
+				replaceSouceFile = true;
 				return;
 			}
 			if (str.compare("main") == 0)
 			{
 				isMain = true;
-				//	q.push('{');
 
 			}
 		}
@@ -206,7 +208,9 @@ void deleteLists()
 	}
 }
 
-
+/* The function getNewCallFunction creates a new call of enclave function 
+   (instead of the suspicious function)
+*/
 std::string getNewCallFunction(std::string oldFunctionName, std::list<std::string> params)
 {
 	std::string newCallFunc = "";
@@ -218,10 +222,10 @@ std::string getNewCallFunction(std::string oldFunctionName, std::list<std::strin
 	}
 	newCallFunc.pop_back();
 	newCallFunc += ')';
-	printf("%s\n", newCallFunc);
+	//printf("%s\n", newCallFunc);
 	return newCallFunc;
 }
-
+/* the function getFuncParams finds all the prameters that the function accepts */
 
 std::list<std::string> getFuncParams(std::string func)
 {
@@ -268,39 +272,140 @@ std::list<std::string> getFuncParams(std::string func)
 
 void replaceLineInTempFile(std::string line, std::string str, int charNum, std::ofstream* tempFile)
 {
-	std::list<std::string> params = getFuncParams(line);
-	std::string newLine = line.substr(0, charNum);
-	newLine += getNewCallFunction(str, params) + ";\n";
-	*tempFile << "//" + line + "\n";
-	*tempFile << newLine;
-}
-
-void copyToSourceFile(std::string sourceFilePath)
-{
-	std::ifstream tempFile;
-	std::ofstream sourceFile;
-	tempFile.open(TEMP_FILE);
-	sourceFile.open(sourceFilePath);
-	std::string line;
-	if (sourceFile.is_open() && tempFile.is_open())
+	if (str.compare("strcpy") == 0) //replace all kinds of function
 	{
-		while (getline(tempFile, line))
-		{
-			sourceFile << line + "\n";
-		}
+		std::list<std::string> params = getFuncParams(line);
+		std::string newLine = line.substr(0, charNum);
+		newLine += getNewCallFunction(str, params) + ";\n";
+		*tempFile << "//" + line + "\n";
+		*tempFile << newLine;
 	}
-	else
+	else if (str.compare("/") == 0)//replace division by zero
 	{
-		if (sourceFile.is_open())
+		std::string num1 = "";
+		std::string num2 = "";
+		std::string result = "";
+		std::string type = "";
+		char c;
+		bool isAfterEqualSign = false, isAfterNum1 = false, isAfterType = false;
+
+		for (int i = 0; i < line.length(); i++)
 		{
-			std::cout << "Unable to open temp file";
+			c = line.at(i);
+			if (!isAfterType)
+				type += c;
+			if (c == ' ' && !isAfterEqualSign)
+			{
+				isAfterType = true;
+				continue;
+			}
+			if (c == '=')
+			{
+				if (result == "") { //if the result has already been set 
+					result = type;
+					type = "";
+				}
+					
+				isAfterEqualSign = true;
+				continue;
+			}
+			else if (c == '/')
+			{
+				isAfterNum1 = true;
+				continue;
+			}
+			else if (c == ';')
+				break;
+
+			if (isAfterEqualSign && !isAfterNum1 && c != '/')
+				num1 += c;
+
+			if (isAfterNum1 && c != ';')
+				num2 += c;
+
+			if (isAfterType && !isAfterEqualSign && !isAfterNum1)
+				result += c;
+		}
+		std::string newLine = "";
+		newLine += "enclaveDivideByZero(eid," + num1 + "," + num2 +  "," + result +");\n";
+		*tempFile << "//" + line + "\n";
+		if (type != "")
+			*tempFile << type + result + "\n";
+		*tempFile << newLine;
+	}
+	else if (str.compare("int32_t") == 0)
+	{
+		int i;
+		char c;
+		int len = line.length();
+		std::string paramName = "";
+		bool isAfterEqualSign = false, isFunction = false;
+		for (i = charNum + 7; i < len; i++)
+		{
+			c = line.at(i);
+			if (c == '=')
+			{
+				isAfterEqualSign = true;
+				break;
+			}
+			else if (c == ';')
+			{
+				break;
+			}
+			else if (!isAfterEqualSign && c == '*')
+			{
+				*tempFile << line + "\n";
+				return;
+			}
+			else if (c == '(')
+			{
+				isFunction = true;
+			}
+		}
+		if (isFunction)
+		{
+			*tempFile << line + "\n";
 		}
 		else
 		{
-			std::cout << "Unable to open source file";
+			std::string newLine = line.substr(0, i);
+			newLine += " = 0;\n";
+			*tempFile << newLine;
 		}
 	}
+}
 
-	sourceFile.close();
-	tempFile.close();
+void copyToSourceFile(std::string sourceFilePath)
+{ 
+	if (replaceSouceFile)
+	{
+		std::ifstream tempFile;
+		std::ofstream sourceFile;
+		tempFile.open(TEMP_FILE);
+		sourceFile.open(sourceFilePath);
+		std::string line;
+		if (sourceFile.is_open() && tempFile.is_open())
+		{
+			while (getline(tempFile, line))
+			{
+				sourceFile << line + "\n";
+			}
+		}
+		else
+		{
+			if (sourceFile.is_open())
+			{
+				std::cout << "Unable to open temp file";
+			}
+			else
+			{
+				std::cout << "Unable to open source file";
+			}
+		}
+		sourceFile.close();
+		tempFile.close();
+	}
+	else
+		std::cout << "No suspicious function found in this file";
+
 }
