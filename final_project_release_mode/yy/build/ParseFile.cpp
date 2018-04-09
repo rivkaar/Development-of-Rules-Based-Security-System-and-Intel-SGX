@@ -5,6 +5,7 @@
 #include <queue>
 
 std::string TEMP_FILE = "C:/Users/ליבוביץ/Desktop/tempFile.c";
+//std::string TEMP_FILE = "C:/Users/ליבוביץ/Desktop/final_project_release_mode/yy/Secure_Application/Source.cpp";
 bool g_isComment = false;
 bool isMain = false;
 std::queue<char> q;
@@ -192,7 +193,7 @@ void parseFile(std::map<std::string, std::string> dictionary, std::string source
 	}
 	sourceFile.close();
 	tempFile.close();
-
+	//trying to keep tempfile!!
 	copyToSourceFile(sourceFilePath); //Copies all content back to the source file
 }
 

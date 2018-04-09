@@ -315,6 +315,8 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClCompile Include="Dictionary.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="ParseFile.cpp" />
+    <ClCompile Include="Scan.cpp" />
+    <ClCompile Include="Validate.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="C:\Users\ליבוביץ\Desktop\yy\build\ZERO_CHECK.vcxproj">
@@ -327,6 +329,8 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClInclude Include="Dictionary.h" />
     <ClInclude Include="ParseFile.h" />
     <ClInclude Include="prog.h" />
+    <ClInclude Include="Scan.h" />
+    <ClInclude Include="Validate.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -3,9 +3,35 @@
 #include <stdio.h>
 #include <tchar.h>
 #include "Compile.h"
+#include "prog.h"
+#include "prog.h"
+#define DEST_PATH
 
-//void _tmain(int argc, TCHAR *argv[])
-void compile(std:: string filepath)
+//renames the exe file and replaces the original exe file by this one??
+void rename(std::string filepath,std::string origin_filepath) {
+	int ret;
+	const char * oldname = filepath.c_str();
+	const char * newname = origin_filepath.c_str();
+
+	//const char * newname = "C://Users//ליבוביץ//Desktop//secure_functions//Debug//StackOverrun.exe";
+	
+	//delete the original file who has the suspected function
+	DeleteFile(newname);
+
+	//replace the original file with a file the contains the secure function
+	ret = rename(oldname, newname);
+
+	if (ret == 0) {
+		printf("File renamed successfully");
+	}
+	else {
+		printf("Error: unable to rename the file");
+	}
+	return;
+
+}
+
+void compile(std:: string filepath,std::string origin_filepath)
 {
 	STARTUPINFO si;
 	PROCESS_INFORMATION pi;
@@ -13,13 +39,8 @@ void compile(std:: string filepath)
 	ZeroMemory(&si, sizeof(si));
 	si.cb = sizeof(si);
 	ZeroMemory(&pi, sizeof(pi));
-	//"C://Users//ליבוביץ//Desktop//StackOverrun.exe
-	char cmdArgs[] = "C://Users//ליבוביץ//Desktop//StackOverrun.exe sarah";
-	/*
-	char params[]="sarah"
-	char cmdArgs[]=strcat(filepath,params)
-
-	*/
+	//C:/Users/ליבוביץ/Desktop/secure_functions/Debug/app.exe 1234
+	char cmdArgs[] = " 1234";
 
 	/*if (argc != 2)
 	{
@@ -28,11 +49,11 @@ void compile(std:: string filepath)
 	}*/
 
 	// Start the child process. 
-	if (!CreateProcess("C://Users//ליבוביץ//Desktop//StackOverrun.exe",   // No module name (use command line)
+	if (!CreateProcess("C:/Users/ליבוביץ/Desktop/secure_functions/Debug/app.exe",   // No module name (use command line)
 		cmdArgs,        // Command line
 		NULL,           // Process handle not inheritable
 		NULL,           // Thread handle not inheritable
-		FALSE,          // Set handle inheritance to FALSE
+		FALSE,  // Set handle inheritance to FALSE
 		0,              // No creation flags
 		NULL,           // Use parent's environment block
 		NULL,           // Use parent's starting directory 
@@ -43,11 +64,18 @@ void compile(std:: string filepath)
 		printf("CreateProcess failed (%d).\n", GetLastError());
 		return;
 	}
+
 	// Wait until child process exits.
 	WaitForSingleObject(pi.hProcess, INFINITE);
+	//renames the file and places it in the original fil
+	rename(filepath,origin_filepath);
 
 	// Close process and thread handles. 
 	CloseHandle(pi.hProcess);
 	CloseHandle(pi.hThread);
+
+	
+
+
 }
 	
