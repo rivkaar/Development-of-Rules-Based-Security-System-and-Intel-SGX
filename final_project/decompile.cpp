@@ -11,6 +11,7 @@ using namespace retdec;
 
 std::string parseName(std::string filepath) {
 	std::string copy = filepath;
+	
 	std::istringstream f(copy);
 	std::string s, exe_name,c_name="./files/";
 	while (std::getline(f, s, '\\')) {
@@ -20,6 +21,7 @@ std::string parseName(std::string filepath) {
 	while (std::getline(g, s, '.')) {
 		c_name += s; break;
 	}
+	
 	c_name += ".c";
 	return c_name;
 
@@ -27,10 +29,7 @@ std::string parseName(std::string filepath) {
 }
 
 std:: string decompile(std::string API_KEY,std:: string FILE_PATH) {
-	/*if (argc != 3) {
-		std::cerr << "usage: " << argv[0] << " API-KEY FILE\n";
-		return 1;
-	}*/
+	
 	std::string output_filepath = parseName(FILE_PATH);
 	std::ofstream fs(output_filepath);
 	

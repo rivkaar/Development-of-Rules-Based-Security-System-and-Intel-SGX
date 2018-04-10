@@ -4,28 +4,25 @@
 #include <tchar.h>
 #include "Compile.h"
 #include "decompile.h"
-#define DEST_PATH
+
 
 //renames the exe file and replaces the original exe file by this one??
 void rename(std::string filepath, std::string origin_filepath) {
 	int ret;
-	//const char * oldname = filepath.c_str();
-	const char * oldname = "C://Users//ליבוביץ//Desktop//final_project//build//x64//Release//Test.exe";
-	//const char * newname = origin_filepath.c_str();
-
-	const char * newname = "C://Users//ליבוביץ//Desktop//final_project//build//x64//Release//StackOverrun.exe";
+	const char * oldname = filepath.c_str();
+	const char * newname = origin_filepath.c_str();
 
 	//delete the original file who has the suspected function
-	//DeleteFile(oldname);
+	DeleteFile(newname);
 
 	//replace the original file with a file the contains the secure function
 	ret = rename(oldname, newname);
 
 	if (ret == 0) {
-		printf("File renamed successfully");
+		printf("File renamed successfully\n");
 	}
 	else {
-		printf("Error: unable to rename the file");
+		printf("Error: unable to rename the file\n");
 	}
 	return;
 
@@ -48,8 +45,7 @@ void compile(std::string filepath, std::string origin_filepath)
 	}*/
 
 	// Start the child process. 
-	//"C:/Users/ליבוביץ/Desktop/secure_functions/Debug/app.exe"
-	if (!CreateProcess("C://Users//ליבוביץ//Desktop//final_project//build//x64//Release//Test.exe",   // No module name (use command line)
+	if (!CreateProcess(filepath.c_str(),   // No module name (use command line)
 		cmdArgs,        // Command line
 		NULL,           // Process handle not inheritable
 		NULL,           // Thread handle not inheritable

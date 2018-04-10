@@ -1,0 +1,51 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Generated Files">
+      <UniqueIdentifier>{5e8624a2-f755-4399-b655-c15c0ee29fd7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{49474f75-1e0d-4c9a-b117-7e2f314ae2b0}</UniqueIdentifier>
+      <Extensions>cpp;c;edl;def;</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{0bc73eeb-9166-49f1-96a5-2606e39f0277}</UniqueIdentifier>
+      <Extensions>h;hpp;</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{daed1eb2-3015-4622-a5f8-f8479c92fc05}</UniqueIdentifier>
+      <Extensions>rc;xml;pem;</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="secure_functions_t.c">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="secure_functions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="secure_functions_t.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="secure_functions_private.pem">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="secure_functions.config.xml">
+      <Filter>Resource Files</Filter>
+    </Xml>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="secure_functions.edl">
+      <Filter>Source Files</Filter>
+    </CustomBuild>
+  </ItemGroup>
+</Project>

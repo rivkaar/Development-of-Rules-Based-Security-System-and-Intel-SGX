@@ -1,12 +1,14 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <iostream>
+#include <fstream>
 #include "Scan.h"
 #include "Dictionary.h"
 #include "ParseFile.h"
 #include "Compile.h"
 #include "decompile.h"
-#include <iostream>
-#include <fstream>
+
+#define DECOMPILED_EXE "C://Users//ליבוביץ//Desktop//final_project//build//x64//Release//secure_application.exe"
 
 using namespace std;
 
@@ -19,8 +21,10 @@ int main(int argc, char* argv[])
 	string decompiled_filepath = decompile(API_KEY, origin_filepath);
 	defineDictionary();
 	parseFile(g_dictionary, decompiled_filepath);
-	compile(decompiled_filepath, origin_filepath);
-	//system("pause");
+	//הבעיה פה שהוא שומר את הקובץ ההרצה הישן-הקוד הראשוני
+	compile(DECOMPILED_EXE, origin_filepath);
+	//to test compilation use the following command:cmd /k "[filepath]"
+	system("pause");
 
 	return 0;
 }
