@@ -1,0 +1,3 @@
+C:/Users/ליבוביץ/Desktop/final_project/build/CMakeFiles/decompile.dir
+C:/Users/ליבוביץ/Desktop/final_project/build/CMakeFiles/ALL_BUILD.dir
+C:/Users/ליבוביץ/Desktop/final_project/build/CMakeFiles/ZERO_CHECK.dir

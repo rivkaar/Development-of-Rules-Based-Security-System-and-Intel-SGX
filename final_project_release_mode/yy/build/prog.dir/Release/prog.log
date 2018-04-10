@@ -1,2 +1,18 @@
 ﻿  Compile.cpp
+  Dictionary.cpp
+  Main.cpp
+  ParseFile.cpp
+ParseFile.cpp(42): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+ParseFile.cpp(91): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+ParseFile.cpp(221): warning C4477: 'printf' : format string '%s' requires an argument of type 'char *', but variadic argument 1 has type 'std::string'
+ParseFile.cpp(255): warning C4477: 'printf' : format string '%s' requires an argument of type 'char *', but variadic argument 1 has type 'std::string'
+  Scan.cpp
+Scan.cpp(5): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+  Validate.cpp
+Validate.cpp(37): warning C4305: 'return': truncation from 'int' to 'bool'
+Validate.cpp(59): warning C4305: 'return': truncation from 'int' to 'bool'
+Validate.cpp(83): warning C4305: 'return': truncation from 'int' to 'bool'
+Validate.cpp(96): warning C4305: 'return': truncation from 'int' to 'bool'
+Validate.cpp(121): warning C4305: 'return': truncation from 'int' to 'bool'
+  Generating Code...
   prog.vcxproj -> C:\Users\ליבוביץ\Desktop\yy\build\Release\prog.exe
