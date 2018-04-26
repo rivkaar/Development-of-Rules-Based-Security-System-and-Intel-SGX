@@ -274,11 +274,140 @@ std::list<std::string> getFuncParams(std::string func)
 
 void replaceLineInTempFile(std::string line, std::string str, int charNum, std::ofstream* tempFile)
 {
-	std::list<std::string> params = getFuncParams(line);
-	std::string newLine = line.substr(0, charNum);
-	newLine += getNewCallFunction(str, params) + ";\n";
-	*tempFile << "//" + line + "\n";
-	*tempFile << newLine;
+	if (str.compare("strcpy") == 0) //replace all kinds of function
+	{
+		std::list<std::string> params = getFuncParams(line);
+		std::string newLine = line.substr(0, charNum);
+		newLine += getNewCallFunction(str, params) + ";\n";
+		*tempFile << "//" + line + "\n";
+		*tempFile << newLine;
+	}
+	else if (str.compare("/") == 0)//replace division by zero
+	{
+		std::string num1 = "";
+		std::string num2 = "";
+		std::string result = "";
+		std::string type = "";
+		std::string s = "";
+		std::string newLine = "";
+		char c;
+		int counter = 0;
+		bool isAfterEqualSign = false, isAfterNum1 = false, isAfterType = false, isPrintf = false;
+
+		for (int i = 0; i < line.length(); i++)
+		{
+			c = line.at(i);
+			if (c != ' ')
+				s += line.at(i);
+			if (!isAfterType && !isPrintf)
+				type += c;
+			if (s.compare("printf") == 0)
+			{
+				newLine += s;
+				isPrintf = true;
+				continue;
+			}
+			if (isPrintf)
+			{
+				if (c == ',')
+					counter += 1;
+				if (counter == 0)
+					newLine += c;
+				else if (counter == 1) {
+					num1 += c;
+					result = "";
+					type = "";
+				}
+				else if (counter == 2)
+					num2 += c;
+				else if (counter > 2)
+					break;
+			}
+			if (c == ' ' && !isAfterEqualSign && !isPrintf)
+			{
+				isAfterType = true;
+				continue;
+			}
+			if (c == '=')
+			{
+				if (result == "") { //if the result has already been set 
+					result = type;
+					type = "";
+				}
+
+				isAfterEqualSign = true;
+				continue;
+			}
+			else if (c == '/')
+			{
+				isAfterNum1 = true;
+				continue;
+			}
+			else if (c == ';')
+				break;
+
+			if (isAfterEqualSign && !isAfterNum1 && c != '/' && !isPrintf)
+				num1 += c;
+
+			if (isAfterNum1 && c != ';' && !isPrintf)
+				num2 += c;
+
+			if (isAfterType && !isAfterEqualSign && !isAfterNum1 && !isPrintf)
+				result += c;
+		}
+		if (isPrintf) {
+			newLine += num1 + num2;
+			newLine += ", enclaveDivideByZero(eid" + num1 + num2 + "," + "int result" + "));\n";
+		}
+		else {
+			newLine += "enclaveDivideByZero(eid," + num1 + "," + num2 + "," + result + ");\n";
+		}
+		*tempFile << "//" + line + "\n";
+		if (type != "")
+			*tempFile << type + result + "\n";
+		*tempFile << newLine;
+
+	}
+	else if (str.compare("int32_t") == 0)
+	{
+		int i;
+		char c;
+		int len = line.length();
+		std::string paramName = "";
+		bool isAfterEqualSign = false, isFunction = false;
+		for (i = charNum + 7; i < len; i++)
+		{
+			c = line.at(i);
+			if (c == '=')
+			{
+				isAfterEqualSign = true;
+				break;
+			}
+			else if (c == ';')
+			{
+				break;
+			}
+			else if (!isAfterEqualSign && c == '*')
+			{
+				*tempFile << line + "\n";
+				return;
+			}
+			else if (c == '(')
+			{
+				isFunction = true;
+			}
+		}
+		if (isFunction)
+		{
+			*tempFile << line + "\n";
+		}
+		else
+		{
+			std::string newLine = line.substr(0, i);
+			newLine += " = 0;\n";
+			*tempFile << newLine;
+		}
+	}
 }
 
 void copyToSourceFile(std::string sourceFilePath)
