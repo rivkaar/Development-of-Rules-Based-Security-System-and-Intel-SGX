@@ -12,7 +12,6 @@ void scan(std::string directory, std::string fileFilter, std::list<std::string> 
 		scan(directory, fileFilter, list, false);
 
 	directory += "\\";
-
 	WIN32_FIND_DATA FindFileData;
 	HANDLE hFind = INVALID_HANDLE_VALUE;
 	std::string fp;

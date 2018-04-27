@@ -1,20 +1,4 @@
 ﻿  Creating untrusted proxy/bridge routines
   secure_functions_u.c
   Source.cpp
-Source.cpp(47): warning #592: variable "v1" is used before its value is set
-        printf("My stack looks like:\n%p\n%p\n%p\n%p\n%p\n% p\n\n", (char *)v1);
-                                                                            ^
-  
-Source.cpp(47): warning #267: the format string requires additional arguments
-        printf("My stack looks like:\n%p\n%p\n%p\n%p\n%p\n% p\n\n", (char *)v1);
-                                                                              ^
-  
-Source.cpp(52): warning #267: the format string requires additional arguments
-        return printf("Now the stack looks like:\n%p\n%p\n%p\n%p\n%p\n%p\n\n", str2);
-                                                                                   ^
-  
-Source.cpp(74): warning #810: conversion from "char **" to "int32_t={int}" may lose significant bits
-        int32_t * str = (int32_t *)((int32_t)argv + 4); // 0x4014ef_0
-                                    ^
-  
   secure_application.vcxproj -> C:\Users\ליבוביץ\Desktop\final_project\build\x64\Release\secure_application.exe

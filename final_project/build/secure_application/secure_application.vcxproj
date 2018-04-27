@@ -35,7 +35,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{093EA7A0-5E64-4D89-9DB1-9A14E0DCEE4B}</ProjectGuid>
+    <ProjectGuid>{4649AACA-42F7-43C2-9BE1-AF64F2BA3255}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>secure_application</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
@@ -267,14 +267,14 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SGXSDKInstallPath)include;$(SGXSDKInstallPath)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories> $(SGXSDKInstallPath)include;$(SGXSDKInstallPath)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SGXSDKInstallPath)bin\$(Plat-form)\$(Configuration);$(SGXSDKInstallPath)\bin\$(Platform)\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories> $(SGXSDKInstallPath)bin\$(Plat-form)\$(Configuration);$(SGXSDKInstallPath)\bin\$(Platform)\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>sgx_uae_service_sim.lib; sgx_urts_sim.lib;sgx_urts.lib;sgx_uae_service.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -300,9 +300,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="secure_functions_u.h" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="secure_functions_u.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Prerelease|x64'">
       </PrecompiledHeader>
@@ -322,6 +319,9 @@
       </PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Source.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="secure_functions_u.h" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\secure_functions\secure_functions.edl">

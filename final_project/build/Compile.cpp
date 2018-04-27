@@ -6,7 +6,7 @@
 #include "decompile.h"
 
 
-//renames the exe file and replaces the original exe file by this one??
+
 void rename(std::string filepath, std::string origin_filepath) {
 	int ret;
 	const char * oldname = filepath.c_str();
@@ -30,46 +30,17 @@ void rename(std::string filepath, std::string origin_filepath) {
 
 void compile(std::string filepath, std::string origin_filepath)
 {
-	STARTUPINFO si;
-	PROCESS_INFORMATION pi;
+	
 
-	ZeroMemory(&si, sizeof(si));
-	si.cb = sizeof(si);
-	ZeroMemory(&pi, sizeof(pi));
-	char cmdArgs[] = " 1234";
-
-	/*if (argc != 2)
-	{
-	printf("Usage: %s [cmdline]\n", argv[0]);
-	return;
-	}*/
-
-	// Start the child process. 
-	if (!CreateProcess(filepath.c_str(),   // No module name (use command line)
-		cmdArgs,        // Command line
-		NULL,           // Process handle not inheritable
-		NULL,           // Thread handle not inheritable
-		FALSE,  // Set handle inheritance to FALSE
-		0,              // No creation flags
-		NULL,           // Use parent's environment block
-		NULL,           // Use parent's starting directory 
-		&si,            // Pointer to STARTUPINFO structure
-		&pi)           // Pointer to PROCESS_INFORMATION structure
-		)
-	{
-		printf("CreateProcess failed (%d).\n", GetLastError());
-		return;
-	}
-
-	// Wait until child process exits.
-	WaitForSingleObject(pi.hProcess, INFINITE);
-	//renames the file and places it in the original fil
-	rename(filepath, origin_filepath);
-
-	// Close process and thread handles. 
-	CloseHandle(pi.hProcess);
-	CloseHandle(pi.hThread);
-
+		std:: string cmd= "cd C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/bin & vcvars32.bat & cd C:/Program Files (x86)/IntelSWTools/parallel_studio_xe_2018.1.041/bin & psxevars.bat intel64 vs2015 & msbuild /p:useenv=true /p:Configuration=Release /p:Platform=x64 ";
+		cmd += filepath;
+		//system recieves const char*
+		system(cmd.c_str());
+		system("pause");
+		//renames the exe file and replaces the original exe file by this one??
+		//TODO:rename functionality not perfect,and how to set as reach file?
+		//rename(filepath, origin_filepath);
+		
 
 
 
