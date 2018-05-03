@@ -33,7 +33,7 @@ bool isAdmin(LPCSTR filepath) {
 		DWORD dwErrorCode = 0;
 
 		dwErrorCode = GetLastError();
-		_tprintf(TEXT("CreateFile error = %d\n"), dwErrorCode);
+		//_tprintf(TEXT("CreateFile error = %d\n"), dwErrorCode);
 		return -1;
 	}
 

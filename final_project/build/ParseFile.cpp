@@ -438,4 +438,5 @@ void copyToSourceFile(std::string sourceFilePath)
 
 	sourceFile.close();
 	tempFile.close();
-}
+
+

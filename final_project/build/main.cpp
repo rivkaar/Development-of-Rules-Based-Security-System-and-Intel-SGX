@@ -8,22 +8,36 @@
 #include "Compile.h"
 #include "decompile.h"
 
-#define DECOMPILED_EXE "C://Users//ליבוביץ//Desktop//final_project//build//x64//Release//secure_application.exe"
+//TODO: change to relative path
+#define DECOMPILED_VCXPROJ "C:/Users/ליבוביץ/Desktop/final_project/build/secure_application/secure_application.vcxproj"
 
 using namespace std;
-
+list<string> exeList;
+list<string>::iterator it;
+string origin_filepath, decompiled_filepath;
+const string  API_KEY = KEY;
 
 int main(int argc, char* argv[])
 {
-	//scan(std::string directory, std::string fileFilter, std::list<std::string> & list, bool recursively = true);
-	const string  API_KEY = KEY;
-	string origin_filepath = "C:\\Users\\ליבוביץ\\Desktop\\StackOverrun.exe";
-	string decompiled_filepath = decompile(API_KEY, origin_filepath);
-	defineDictionary();
-	parseFile(g_dictionary, decompiled_filepath);
-	//הבעיה פה שהוא שומר את הקובץ ההרצה הישן-הקוד הראשוני
-	compile(DECOMPILED_EXE, origin_filepath);
-	//to test compilation use the following command:cmd /k "[filepath]"
+	
+	exeList.push_back("C:\\Users\\User\\Desktop\\DevisionByZero.exe");
+	scan("C:\\", "*.exe", exeList); // gets a list of all exe files 
+
+	for (it = exeList.begin(); it != exeList.end(); it++)
+	{
+		//Print the contents
+		//std::cout<< it->c_str() << std::endl;
+
+		origin_filepath = it->c_str();
+		decompiled_filepath = decompile(API_KEY, origin_filepath);
+		defineDictionary();
+		parseFile(g_dictionary, decompiled_filepath);
+
+		//to test compilation use the following command:cmd /k "[filepath]"
+		compile(DECOMPILED_VCXPROJ, origin_filepath);
+		break;
+	}
+	
 	system("pause");
 
 	return 0;
