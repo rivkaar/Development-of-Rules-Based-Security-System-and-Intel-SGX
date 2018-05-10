@@ -135,7 +135,7 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>KEY="834c39c3-3c97-469a-8433-0dc159038a8e";WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR="Release";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>SOLUTION_DIR=R"?($(SolutionDir))?";DECOMPILED_VCXPROJ=R"?($(SolutionDir)secure_application\secure_application.vcxproj)?";ENCLAVE_DLL=R"?($(SolutionDir)x64\Release\secure_functions.signed.dll)?";EXE_FILEPATH=R"?($(SolutionDir)secure_application\x64\Release\secure_application.exe)?";KEY="834c39c3-3c97-469a-8433-0dc159038a8e";WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR="Release";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <DebugInformationFormat>
       </DebugInformationFormat>

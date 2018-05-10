@@ -4,8 +4,8 @@
 #include <string>
 #include <queue>
 
-//std::string TEMP_FILE = "C:/Users/ליבוביץ/Desktop/tempFile.c";
-std::string TEMP_FILE = "C:/Users/ליבוביץ/Desktop/final_project/build/secure_application/Source.cpp";
+#define  DLL  "#define ENCLAVE_FILE _T ("    "\""   ENCLAVE_DLL "\""           ")\n";
+#define TEMP_FILE  SOLUTION_DIR "secure_application\\Source.cpp"
 
 bool g_isComment = false;
 bool isMain = false;
@@ -141,9 +141,15 @@ void findWordInLine(std::string line, int lineNum, std::ofstream* tempFile)
 
 void parseFile(std::map<std::string, std::string> dictionary, std::string sourceFilePath)
 {
+	//replacing vs backward trailing slash by forward slash
+	std::string dll = DLL;
+	std::string tempfilePath = TEMP_FILE;
+	std::replace(dll.begin(), dll.end(), '\\', '/');
+	std::replace(tempfilePath.begin(), tempfilePath.end(), '\\', '/');
+
 	std::ifstream sourceFile;
 	std::ofstream tempFile;
-	tempFile.open(TEMP_FILE);
+	tempFile.open(tempfilePath);
 	sourceFile.open(sourceFilePath);
 	std::string line;
 	int lineNum = 0;
@@ -154,7 +160,7 @@ void parseFile(std::map<std::string, std::string> dictionary, std::string source
 	str += "#include <stdint.h>\n";
 	str += "#include <stdio.h>\n";
 	str += "#include <stdlib.h>\n";
-	str += "#define ENCLAVE_FILE _T(\"secure_functions.signed.dll\")\n";
+	str += dll;
 	str += "using namespace std;\n";
 	str += "/* OCall functions */\n";
 	str += "void ocall_print_string(const char *str)\n{\n";
@@ -194,8 +200,6 @@ void parseFile(std::map<std::string, std::string> dictionary, std::string source
 	}
 	sourceFile.close();
 	tempFile.close();
-	//trying to keep tempfile!!
-	//copyToSourceFile(sourceFilePath); //Copies all content back to the source file
 }
 
 
@@ -410,33 +414,5 @@ void replaceLineInTempFile(std::string line, std::string str, int charNum, std::
 	}
 }
 
-void copyToSourceFile(std::string sourceFilePath)
-{
-	std::ifstream tempFile;
-	std::ofstream sourceFile;
-	tempFile.open(TEMP_FILE);
-	sourceFile.open(sourceFilePath);
-	std::string line;
-	if (sourceFile.is_open() && tempFile.is_open())
-	{
-		while (getline(tempFile, line))
-		{
-			sourceFile << line + "\n";
-		}
-	}
-	else
-	{
-		if (sourceFile.is_open())
-		{
-			std::cout << "Unable to open temp file";
-		}
-		else
-		{
-			std::cout << "Unable to open source file";
-		}
-	}
-
-	sourceFile.close();
-	tempFile.close();
 
 
