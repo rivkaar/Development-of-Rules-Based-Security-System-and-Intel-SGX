@@ -3,14 +3,19 @@
 #include <fstream>
 #include <string>
 #include <queue>
+#include <sstream>
 
 #define  DLL  "#define ENCLAVE_FILE _T ("    "\""   ENCLAVE_DLL "\""           ")\n";
 #define TEMP_FILE  SOLUTION_DIR "secure_application\\Source.cpp"
 
 bool g_isComment = false;
+bool isFunc = false;
 bool isMain = false;
+bool isRecursion = false;
+std::string func_name;
 std::queue<char> q;
 std::list<WordData*> g_wordsList;
+std::list<std::string> recursion_func;
 
 
 WordData::WordData(int lineNum, int charNum, std::string word)
@@ -86,6 +91,37 @@ void findWordInLine(std::string line, int lineNum, std::ofstream* tempFile)
 				}
 
 			}
+			if (c == '(')
+			{
+				if (line.at(len - 1) != ';')
+				{
+					func_name = getFuncName(line);
+					if (func_name != "") {
+						isFunc = true;
+					}
+				}
+				else
+				{
+					std::string name = getFuncName(line);
+
+					if (func_name.compare(name) == 0 && q.size() > 0 && name != "" && func_name != "" && isFunc) {
+						isRecursion = true;
+						std::cout << name << " isRecursion" << std::endl;
+						recursion_func.push_back(func_name);
+					}
+				}
+
+			}
+			if (str.compare("main") == 0)
+			{
+				isMain = true;
+			}
+			if (c == '{' && !isMain && isFunc) {
+				q.push('{');
+			}
+			if (c == '}' && !isMain && isFunc) {
+				q.pop();
+			}
 
 			if (g_dictionary.count(str) > 0)
 			{
@@ -96,12 +132,7 @@ void findWordInLine(std::string line, int lineNum, std::ofstream* tempFile)
 				isSuspiciousFuncFound = true;
 				return;
 			}
-			if (str.compare("main") == 0)
-			{
-				isMain = true;
-				//	q.push('{');
-
-			}
+		
 		}
 		else if (c == '#')
 		{
@@ -201,7 +232,19 @@ void parseFile(std::map<std::string, std::string> dictionary, std::string source
 	sourceFile.close();
 	tempFile.close();
 }
+std::string getFuncName(std::string line) {
 
+	std::istringstream f(line);
+	std::string s, func_name;
+	std::getline(f, s, '(');
+	std::istringstream g(s);
+	std::getline(g, s, ' ');
+	std::getline(g, s, ' ');
+	func_name = s;
+	func_name.erase(std::remove(func_name.begin(), func_name.end(), '\t'), func_name.end());
+
+	return func_name;
+}
 
 void deleteLists()
 {
