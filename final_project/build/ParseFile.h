@@ -33,6 +33,5 @@ void parseFile(std::map<std::string, std::string> dictionary, std::string source
 void findWordInLine(std::string line, int lineNum, std::ofstream* tempFile);
 void deleteLists();
 void replaceLineInTempFile(std::string line, std::string str, int charNum, std::ofstream* tempFile);
-std::string getFuncName(std::string line);
 
 #endif // !_PARSE_FILE_H

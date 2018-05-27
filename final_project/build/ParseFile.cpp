@@ -1,4 +1,5 @@
 #include "parsefile.h"
+#include "RecursionHandle.h"
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -109,6 +110,11 @@ void findWordInLine(std::string line, int lineNum, std::ofstream* tempFile)
 						std::cout << name << " isRecursion" << std::endl;
 						recursion_func.push_back(func_name);
 					}
+					if (isRecursive(name, recursion_func)) {
+						std::cout << line << " need to replace" << std::endl;
+
+					}
+
 				}
 
 			}
@@ -232,19 +238,7 @@ void parseFile(std::map<std::string, std::string> dictionary, std::string source
 	sourceFile.close();
 	tempFile.close();
 }
-std::string getFuncName(std::string line) {
 
-	std::istringstream f(line);
-	std::string s, func_name;
-	std::getline(f, s, '(');
-	std::istringstream g(s);
-	std::getline(g, s, ' ');
-	std::getline(g, s, ' ');
-	func_name = s;
-	func_name.erase(std::remove(func_name.begin(), func_name.end(), '\t'), func_name.end());
-
-	return func_name;
-}
 
 void deleteLists()
 {

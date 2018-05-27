@@ -313,6 +313,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClCompile Include="Dictionary.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ParseFile.cpp" />
+    <ClCompile Include="RecursionHandle.cpp" />
     <ClCompile Include="Scan.cpp" />
     <ClCompile Include="Validate.cpp" />
   </ItemGroup>
@@ -327,6 +328,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClInclude Include="decompile.h" />
     <ClInclude Include="Dictionary.h" />
     <ClInclude Include="ParseFile.h" />
+    <ClInclude Include="RecursionHandle.h" />
     <ClInclude Include="Scan.h" />
     <ClInclude Include="Validate.h" />
   </ItemGroup>
