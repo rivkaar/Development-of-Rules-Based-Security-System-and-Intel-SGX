@@ -1,9 +1,9 @@
 ﻿  Creating proxy/bridge routines
   secure_functions.cpp
   secure_functions_t.c
-     Creating library C:\Users\ליבוביץ\Documents\Development-of-Rules-Based-Security-System-and-Intel-SGX\final_project\build\x64\Release\secure_functions.lib and object C:\Users\ליבוביץ\Documents\Development-of-Rules-Based-Security-System-and-Intel-SGX\final_project\build\x64\Release\secure_functions.exp
-  secure_functions.vcxproj -> C:\Users\ליבוביץ\Documents\Development-of-Rules-Based-Security-System-and-Intel-SGX\final_project\build\x64\Release\secure_functions.dll
-  The required memory is 0x169000.
+     Creating library C:\Users\ליבוביץ\Desktop\Development-of-Rules-Based-Security-System-and-Intel-SGX\final_project\build\x64\Release\secure_functions.lib and object C:\Users\ליבוביץ\Desktop\Development-of-Rules-Based-Security-System-and-Intel-SGX\final_project\build\x64\Release\secure_functions.exp
+  secure_functions.vcxproj -> C:\Users\ליבוביץ\Desktop\Development-of-Rules-Based-Security-System-and-Intel-SGX\final_project\build\x64\Release\secure_functions.dll
+  The required memory is 0x171000.
   Succeed.
   <EnclaveConfiguration>
       <ProdID>0</ProdID>
