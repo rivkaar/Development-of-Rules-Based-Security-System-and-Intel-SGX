@@ -19,16 +19,3 @@ void enclaveStrcpy(char* dest, const char* src)
 	}
 	strncpy(dest, src, len + 1);
 }
-
-void enclaveRecursive(int* outRes, size_t size)
-{
-	int* retval = new int;
-	//Tail Call
-	int result = int_ocall_wrapper((int*)retval);
-	if (result != SGX_SUCCESS)
-	{
-		abort();
-	}
-	//copying result to pointer that could be accessed  from outside the enclave 
-	memcpy(outRes, (int*)retval, size);
-}

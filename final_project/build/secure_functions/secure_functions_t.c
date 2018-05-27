@@ -22,10 +22,6 @@ typedef struct ms_enclaveStrcpy_t {
 	char* ms_src;
 } ms_enclaveStrcpy_t;
 
-typedef struct ms_int_ocall_wrapper_t {
-	int ms_retval;
-} ms_int_ocall_wrapper_t;
-
 typedef struct ms_sgx_oc_cpuidex_t {
 	int* ms_cpuinfo;
 	int ms_leaf;
@@ -118,11 +114,10 @@ SGX_EXTERNC const struct {
 
 SGX_EXTERNC const struct {
 	size_t nr_ocall;
-	uint8_t entry_table[6][1];
+	uint8_t entry_table[5][1];
 } g_dyn_entry_table = {
-	6,
+	5,
 	{
-		{0, },
 		{0, },
 		{0, },
 		{0, },
@@ -131,31 +126,6 @@ SGX_EXTERNC const struct {
 	}
 };
 
-
-sgx_status_t SGX_CDECL int_ocall_wrapper(int* retval)
-{
-	sgx_status_t status = SGX_SUCCESS;
-
-	ms_int_ocall_wrapper_t* ms = NULL;
-	size_t ocalloc_size = sizeof(ms_int_ocall_wrapper_t);
-	void *__tmp = NULL;
-
-
-	__tmp = sgx_ocalloc(ocalloc_size);
-	if (__tmp == NULL) {
-		sgx_ocfree();
-		return SGX_ERROR_UNEXPECTED;
-	}
-	ms = (ms_int_ocall_wrapper_t*)__tmp;
-	__tmp = (void *)((size_t)__tmp + sizeof(ms_int_ocall_wrapper_t));
-
-	status = sgx_ocall(0, ms);
-
-	if (retval) *retval = ms->ms_retval;
-
-	sgx_ocfree();
-	return status;
-}
 
 sgx_status_t SGX_CDECL sgx_oc_cpuidex(int cpuinfo[4], int leaf, int subleaf)
 {
@@ -189,7 +159,7 @@ sgx_status_t SGX_CDECL sgx_oc_cpuidex(int cpuinfo[4], int leaf, int subleaf)
 	
 	ms->ms_leaf = leaf;
 	ms->ms_subleaf = subleaf;
-	status = sgx_ocall(1, ms);
+	status = sgx_ocall(0, ms);
 
 	if (cpuinfo) memcpy((void*)cpuinfo, ms->ms_cpuinfo, _len_cpuinfo);
 
@@ -215,7 +185,7 @@ sgx_status_t SGX_CDECL sgx_thread_wait_untrusted_event_ocall(int* retval, const 
 	__tmp = (void *)((size_t)__tmp + sizeof(ms_sgx_thread_wait_untrusted_event_ocall_t));
 
 	ms->ms_self = SGX_CAST(void*, self);
-	status = sgx_ocall(2, ms);
+	status = sgx_ocall(1, ms);
 
 	if (retval) *retval = ms->ms_retval;
 
@@ -241,7 +211,7 @@ sgx_status_t SGX_CDECL sgx_thread_set_untrusted_event_ocall(int* retval, const v
 	__tmp = (void *)((size_t)__tmp + sizeof(ms_sgx_thread_set_untrusted_event_ocall_t));
 
 	ms->ms_waiter = SGX_CAST(void*, waiter);
-	status = sgx_ocall(3, ms);
+	status = sgx_ocall(2, ms);
 
 	if (retval) *retval = ms->ms_retval;
 
@@ -268,7 +238,7 @@ sgx_status_t SGX_CDECL sgx_thread_setwait_untrusted_events_ocall(int* retval, co
 
 	ms->ms_waiter = SGX_CAST(void*, waiter);
 	ms->ms_self = SGX_CAST(void*, self);
-	status = sgx_ocall(4, ms);
+	status = sgx_ocall(3, ms);
 
 	if (retval) *retval = ms->ms_retval;
 
@@ -307,7 +277,7 @@ sgx_status_t SGX_CDECL sgx_thread_set_multiple_untrusted_events_ocall(int* retva
 	}
 	
 	ms->ms_total = total;
-	status = sgx_ocall(5, ms);
+	status = sgx_ocall(4, ms);
 
 	if (retval) *retval = ms->ms_retval;
 

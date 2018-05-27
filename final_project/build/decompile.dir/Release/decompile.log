@@ -1,9 +1,1 @@
-﻿  decompile.cpp
-  ParseFile.cpp
-ParseFile.cpp(43): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-ParseFile.cpp(92): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-ParseFile.cpp(226): warning C4477: 'printf' : format string '%s' requires an argument of type 'char *', but variadic argument 1 has type 'std::string'
-ParseFile.cpp(260): warning C4477: 'printf' : format string '%s' requires an argument of type 'char *', but variadic argument 1 has type 'std::string'
-ParseFile.cpp(379): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-  Generating Code...
-  decompile.vcxproj -> C:\Users\ליבוביץ\Desktop\final_project\build\Release\decompile.exe
+﻿  decompile.vcxproj -> C:\Users\ליבוביץ\Desktop\final_project\build\Release\decompile.exe
