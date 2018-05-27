@@ -9,6 +9,7 @@ enclave {
 
     untrusted {
         /* define OCALLs here. */
+		[cdecl]int int_ocall_wrapper();
 		
 
     };
