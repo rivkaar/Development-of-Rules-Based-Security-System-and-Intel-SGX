@@ -17,7 +17,8 @@ std::string func_name;
 std::queue<char> q;
 std::list<WordData*> g_wordsList;
 std::list<std::string> recursion_func;
-
+std::string int_wrapper;
+int counter = 0;
 
 WordData::WordData(int lineNum, int charNum, std::string word)
 {
@@ -112,7 +113,12 @@ void findWordInLine(std::string line, int lineNum, std::ofstream* tempFile)
 					}
 					if (isRecursive(name, recursion_func)) {
 						std::cout << line << " need to replace" << std::endl;
-
+						replaceToEnclaveRecursion(line, tempFile);
+						std::list<std::string> params = getFuncParams(line);
+						counter++;
+						int_wrapper += addFunctionCallInWrapper(name, params, counter);
+						isSuspiciousFuncFound = true;
+						return;
 					}
 
 				}
@@ -198,6 +204,8 @@ void parseFile(std::map<std::string, std::string> dictionary, std::string source
 	str += "#include <stdio.h>\n";
 	str += "#include <stdlib.h>\n";
 	str += dll;
+	str += "int counter = 0;\n";//for the case in wrapper function
+	str += "std::string create_int_wrapper();\n ";//Statement of function
 	str += "using namespace std;\n";
 	str += "/* OCall functions */\n";
 	str += "void ocall_print_string(const char *str)\n{\n";
@@ -213,6 +221,11 @@ void parseFile(std::map<std::string, std::string> dictionary, std::string source
 	str += "	return ret;\n}\n";
 	str += "sgx_enclave_id_t eid;\n\n";
 
+	int_wrapper = "int int_wrapper(){ \n";
+	int_wrapper += "	counter++; \n";
+	int_wrapper += "	switch (counter) \n";
+	int_wrapper += "	{\n";
+
 	if (sourceFile.is_open() && tempFile.is_open())
 	{
 		tempFile << str;
@@ -221,6 +234,10 @@ void parseFile(std::map<std::string, std::string> dictionary, std::string source
 			findWordInLine(line, lineNum, &tempFile);
 			lineNum++;
 		}
+		int_wrapper += "	default:return; break;\n";
+		int_wrapper += "	}\n";
+		int_wrapper += "}\n";
+		tempFile << int_wrapper;
 
 	}
 
