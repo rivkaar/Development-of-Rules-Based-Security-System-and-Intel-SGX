@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#define ENCLAVE_FILE _T ("C:/Users/ליבוביץ/Documents/Development-of-Rules-Based-Security-System-and-Intel-SGX/final_project/build/x64/Release/secure_functions.signed.dll")
+#define ENCLAVE_FILE _T ("C:/Users/ליבוביץ/Desktop/Development-of-Rules-Based-Security-System-and-Intel-SGX/final_project/build/x64/Release/secure_functions.signed.dll")
 using namespace std;
 /* OCall functions */
 void ocall_print_string(const char *str)
@@ -110,4 +110,4 @@ int main(int argc, char ** argv) {
 // Detected language: C
 // Detected functions: 3
 // Decompiler release: v2.2.1 (2016-09-07)
-// Decompilation date: 2018-05-10 19:24:14
+// Decompilation date: 2018-05-27 20:18:23
