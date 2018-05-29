@@ -15,31 +15,9 @@ bool isMain = false;
 bool isRecursion = false;
 std::string func_name;
 std::queue<char> q;
-std::list<WordData*> g_wordsList;
 std::list<std::string> recursion_func;
 std::string int_wrapper;
 int counter = 0;
-
-WordData::WordData(int lineNum, int charNum, std::string word)
-{
-	WordData::lineNum = lineNum;
-	WordData::charNum = charNum;
-	WordData::word = word;
-}
-
-int WordData::getLineNum()
-{
-	return lineNum;
-}
-int WordData::getCharNum()
-{
-	return charNum;
-}
-std::string WordData::getWord()
-{
-	return word;
-}
-
 
 void findWordInLine(std::string line, int lineNum, std::ofstream* tempFile)
 {
@@ -112,6 +90,7 @@ void findWordInLine(std::string line, int lineNum, std::ofstream* tempFile)
 						recursion_func.push_back(func_name);
 					}
 					if (isRecursive(name, recursion_func)) {
+						//if the function in recursive list replace to enclaveRecursion
 						std::cout << line << " need to replace" << std::endl;
 						replaceToEnclaveRecursion(line, tempFile);
 						std::list<std::string> params = getFuncParams(line);
@@ -138,8 +117,6 @@ void findWordInLine(std::string line, int lineNum, std::ofstream* tempFile)
 			if (g_dictionary.count(str) > 0)
 			{
 				int charNum = i - str.length();
-				WordData* data = new WordData(lineNum, charNum, str);
-				g_wordsList.push_back(data);
 				replaceLineInTempFile(line, str, charNum, tempFile);
 				isSuspiciousFuncFound = true;
 				return;
@@ -257,13 +234,13 @@ void parseFile(std::map<std::string, std::string> dictionary, std::string source
 }
 
 
-void deleteLists()
-{
-	for (std::list<WordData*>::iterator list_iter = g_wordsList.begin(); list_iter != g_wordsList.end(); list_iter++)
-	{
-		delete *list_iter;
-	}
-}
+//void deleteLists()
+//{
+//	for (std::list<WordData*>::iterator list_iter = g_wordsList.begin(); list_iter != g_wordsList.end(); list_iter++)
+//	{
+//		delete *list_iter;
+//	}
+//}
 
 
 std::string getNewCallFunction(std::string oldFunctionName, std::list<std::string> params)
