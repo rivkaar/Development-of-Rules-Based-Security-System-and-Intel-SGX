@@ -14,6 +14,7 @@
 extern "C" {
 #endif
 
+int SGX_UBRIDGE(SGX_CDECL, int_wrapper, ());
 void SGX_UBRIDGE(SGX_CDECL, sgx_oc_cpuidex, (int cpuinfo[4], int leaf, int subleaf));
 int SGX_UBRIDGE(SGX_CDECL, sgx_thread_wait_untrusted_event_ocall, (const void* self));
 int SGX_UBRIDGE(SGX_CDECL, sgx_thread_set_untrusted_event_ocall, (const void* waiter));
@@ -21,6 +22,7 @@ int SGX_UBRIDGE(SGX_CDECL, sgx_thread_setwait_untrusted_events_ocall, (const voi
 int SGX_UBRIDGE(SGX_CDECL, sgx_thread_set_multiple_untrusted_events_ocall, (const void** waiters, size_t total));
 
 sgx_status_t enclaveStrcpy(sgx_enclave_id_t eid, char* dest, const char* src);
+sgx_status_t enclaveRecursive(sgx_enclave_id_t eid, int* res, size_t size);
 
 #ifdef __cplusplus
 }

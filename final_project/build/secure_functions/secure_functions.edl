@@ -4,11 +4,13 @@ enclave {
     trusted {
         /* define ECALLs here. */
 		public void enclaveStrcpy([in, out, string] char* dest, [in, string] const char* src);
+		public void enclaveRecursive([in, out, size=size]int* res, size_t size);
 
     };
 
     untrusted {
         /* define OCALLs here. */
-
+		
+		[cdecl]int int_wrapper();
     };
 };

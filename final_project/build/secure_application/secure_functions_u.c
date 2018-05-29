@@ -6,6 +6,15 @@ typedef struct ms_enclaveStrcpy_t {
 	char* ms_src;
 } ms_enclaveStrcpy_t;
 
+typedef struct ms_enclaveRecursive_t {
+	int* ms_res;
+	size_t ms_size;
+} ms_enclaveRecursive_t;
+
+typedef struct ms_int_wrapper_t {
+	int ms_retval;
+} ms_int_wrapper_t;
+
 typedef struct ms_sgx_oc_cpuidex_t {
 	int* ms_cpuinfo;
 	int ms_leaf;
@@ -33,6 +42,14 @@ typedef struct ms_sgx_thread_set_multiple_untrusted_events_ocall_t {
 	void** ms_waiters;
 	size_t ms_total;
 } ms_sgx_thread_set_multiple_untrusted_events_ocall_t;
+
+static sgx_status_t SGX_CDECL secure_functions_int_wrapper(void* pms)
+{
+	ms_int_wrapper_t* ms = SGX_CAST(ms_int_wrapper_t*, pms);
+	ms->ms_retval = int_wrapper();
+
+	return SGX_SUCCESS;
+}
 
 static sgx_status_t SGX_CDECL secure_functions_sgx_oc_cpuidex(void* pms)
 {
@@ -76,10 +93,11 @@ static sgx_status_t SGX_CDECL secure_functions_sgx_thread_set_multiple_untrusted
 
 static const struct {
 	size_t nr_ocall;
-	void * func_addr[5];
+	void * func_addr[6];
 } ocall_table_secure_functions = {
-	5,
+	6,
 	{
+		(void*)(uintptr_t)secure_functions_int_wrapper,
 		(void*)(uintptr_t)secure_functions_sgx_oc_cpuidex,
 		(void*)(uintptr_t)secure_functions_sgx_thread_wait_untrusted_event_ocall,
 		(void*)(uintptr_t)secure_functions_sgx_thread_set_untrusted_event_ocall,
@@ -95,6 +113,16 @@ sgx_status_t enclaveStrcpy(sgx_enclave_id_t eid, char* dest, const char* src)
 	ms.ms_dest = dest;
 	ms.ms_src = (char*)src;
 	status = sgx_ecall(eid, 0, &ocall_table_secure_functions, &ms);
+	return status;
+}
+
+sgx_status_t enclaveRecursive(sgx_enclave_id_t eid, int* res, size_t size)
+{
+	sgx_status_t status;
+	ms_enclaveRecursive_t ms;
+	ms.ms_res = res;
+	ms.ms_size = size;
+	status = sgx_ecall(eid, 1, &ocall_table_secure_functions, &ms);
 	return status;
 }
 

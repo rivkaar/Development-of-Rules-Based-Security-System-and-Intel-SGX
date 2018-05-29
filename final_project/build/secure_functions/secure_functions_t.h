@@ -15,7 +15,9 @@ extern "C" {
 
 
 void enclaveStrcpy(char* dest, const char* src);
+void enclaveRecursive(int* res, size_t size);
 
+sgx_status_t SGX_CDECL int_wrapper(int* retval);
 sgx_status_t SGX_CDECL sgx_oc_cpuidex(int cpuinfo[4], int leaf, int subleaf);
 sgx_status_t SGX_CDECL sgx_thread_wait_untrusted_event_ocall(int* retval, const void* self);
 sgx_status_t SGX_CDECL sgx_thread_set_untrusted_event_ocall(int* retval, const void* waiter);

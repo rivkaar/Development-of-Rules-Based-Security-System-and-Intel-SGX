@@ -181,8 +181,8 @@ void parseFile(std::map<std::string, std::string> dictionary, std::string source
 	str += "#include <stdio.h>\n";
 	str += "#include <stdlib.h>\n";
 	str += dll;
-	str += "int counter = 0;\n";//for the case in wrapper function
-	str += "std::string create_int_wrapper();\n ";//Statement of function
+	str += "\nint counter = 0;\n";//for the case in wrapper function
+	str += "\nint int_wrapper();\n ";//Statement of function
 	str += "using namespace std;\n";
 	str += "/* OCall functions */\n";
 	str += "void ocall_print_string(const char *str)\n{\n";
