@@ -1,2 +1,7 @@
-﻿  Source.cpp
+﻿  secure_functions_u.c
+  Source.cpp
+Source.cpp(74): warning #1011: missing return statement at end of non-void function "int_wrapper"
+    }
+    ^
+  
   secure_application.vcxproj -> C:\Users\ליבוביץ\Desktop\dev\final_project\build\x64\Release\secure_application.exe

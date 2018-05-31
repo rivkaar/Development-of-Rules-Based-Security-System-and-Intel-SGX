@@ -9,6 +9,7 @@
 
 //HashMap to hold variblename->value
 std::map<std::string, std::string> variableMap;
+bool isNewScope;
 
 
 //preprocessor macro ??
@@ -76,9 +77,9 @@ bool isRecursive(std::string name, std::list<std::string> recursion_func) {
 }																			
 
 void replaceToEnclaveRecursion(std::string line, std::ofstream* tempFile ,bool contains_equal) {
-
+	std::string replacement_lines="";
 	//These lines are required in order to get a return value from inside the enclave
-	std::string replacement_lines= "\tint* outRes = new int;\n\t*outRes = 0;\n\t";
+	replacement_lines = "\t*outRes = 0;\n\t";
 	//Replace unsecure recursive function with a secure recursive function
 	replacement_lines += "enclaveRecursive(eid,(int*)outRes,sizeof(int));\n";
 	if (contains_equal)
@@ -107,10 +108,14 @@ std::string addFunctionCallInWrapper(std::string funcName, std::list<std::string
 		}
 		else
 		{
+
 			str += (*list_iter + ",");
 		}
 	}
+
+	str.pop_back();
 	str += ");break;\n";
 	return str;
 }
+
 

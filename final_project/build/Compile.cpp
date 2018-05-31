@@ -44,7 +44,6 @@ void compile(std::string filepath, std::string origin_filepath)
 	deactivate(origin_filepath);
 	//replaces decompiled exe in original exe filepath
 	replace_file(EXE_FILEPATH, origin_filepath);
-	system("pause");
 
 }
 

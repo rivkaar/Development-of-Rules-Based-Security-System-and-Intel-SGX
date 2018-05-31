@@ -86,10 +86,10 @@ void findWordInLine(std::string line, int lineNum, std::ofstream* tempFile)
 
 					if (func_name.compare(name) == 0 && q.size() > 0 && name != "" && func_name != "" && isFunc) {
 						isRecursion = true;
-						std::cout << name << " isRecursion" << std::endl;
+						std::cout <<name<< " isRecursion" << std::endl;
 						recursion_func.push_back(func_name);
 					}
-					if (isRecursive(name, recursion_func)) {
+					else if (isRecursive(name, recursion_func)) {
 						bool contains_equal = false;
 						//if the function in recursive list replace to enclaveRecursion
 						std::cout << line << " need to replace" << std::endl;
@@ -187,6 +187,7 @@ void parseFile(std::map<std::string, std::string> dictionary, std::string source
 	str += "#include <stdlib.h>\n";
 	str += dll;
 	str += "\nint counter = 0;\n";//for the case in wrapper function
+	str += "\nint* outRes = new int;\n";
 	str += "\nint int_wrapper();\n ";//Statement of function
 	str += "using namespace std;\n";
 	str += "/* OCall functions */\n";
@@ -216,8 +217,8 @@ void parseFile(std::map<std::string, std::string> dictionary, std::string source
 			findWordInLine(line, lineNum, &tempFile);
 			lineNum++;
 		}
-		int_wrapper += "	default:return; break;\n";
-		int_wrapper += "	}\n";
+		int_wrapper += "	default:break;\n";
+		int_wrapper += "	}\n\treturn 0;\n";
 		int_wrapper += "}\n";
 		tempFile << int_wrapper;
 
