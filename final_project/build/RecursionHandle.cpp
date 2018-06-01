@@ -6,45 +6,61 @@
 #include <queue>
 #include <sstream>
 #include <boost\algorithm\string.hpp>
+#include <boost\algorithm\string\split.hpp>
 
 //HashMap to hold variblename->value
 std::map<std::string, std::string> variableMap;
-bool isNewScope;
 
-
-//preprocessor macro ??
-//#define KEY(name) #name
-//#define VALUE(name) name
 
 void addMapEntry(std::string key,std::string value)
 {
 	variableMap[key] = value;
-	std::cout << "key:" << key << " val:" << variableMap[key] << std::endl;
 }
 
+/*this functions scans for all variable assignments in file and places variable and value in hashmap*/
 void scanAndMap(std::string line)
 {
-	if (line.find('=') != std::string::npos)
+	std::vector<std::string> params;
+	std::string param, s, key, value, temp;
+	//in case there is more than one variable defined in the line
+	boost::split(params, line,boost::is_any_of(","));
+
+	for (size_t i = 0; i < params.size(); i++)
 	{
-		std::cout << "line " << line << "\n";
-		std::string s,key,value;
-		std::istringstream g(line);
-		std::getline(g, s, '=');
-		std::string temp = s;
-		std::istringstream f(temp);
-		while (std::getline(f, s, ' ')){
-			key = s;
+		param = params[i];
+
+		if (param.find('=') != std::string::npos)
+		{
+			std::cout << "line " << param << "\n";
+			std::istringstream g(param);
+			std::getline(g, s, '=');
+			temp = s;
+			std::istringstream f(temp);
+			while (std::getline(f, s, ' ')) {
+				key = s;
+			}
+			boost::trim_left(key);
+			std::getline(g, s, '=');
+			temp = s;
+			std::istringstream a(temp);
+			std::getline(a, s, ';');
+			value = s;
+			addMapEntry(key, value);
 		}
-		boost::trim_left(key);
-		std::getline(g, s, '=');
-		temp= s;
-		std::istringstream a(temp);
-		std::getline(a, s, ';');
-		value = s;
-		addMapEntry(key, value);
-
-
 	}
+}
+
+
+bool isCondition(std::string line)
+{
+	std::string conditions = "if while doWhile for foreach switch";
+	std::string condition;
+	std::istringstream f(conditions);
+	while (std::getline(f, condition, ' ')) {
+		if (boost::find_first(line, condition)) return true;
+	}
+	
+	return false;
 }
 
 std::string getFuncName(std::string line) {
@@ -53,7 +69,7 @@ std::string getFuncName(std::string line) {
 
 	std::getline(f, s, '(');
 
-	//if there is a equal sign, need to check if there is no function call after the equal sign
+	//if there is a equal sign, we need to check if there is no function call after the equal sign
 	if (s.find('=') != std::string::npos)
 	{
 		std::istringstream g(s);
@@ -96,9 +112,9 @@ void replaceToEnclaveRecursion(std::string line, std::ofstream* tempFile ,bool c
 }
 std::string addFunctionCallInWrapper(std::string funcName, std::list<std::string> params, int counter) {
 	std::string str;
-	str += "	case ";
+	str += "\t\tcase ";
 	str += std::to_string(counter);
-	str += ":" + funcName + "(";
+	str += ": return " + funcName + "(";
 	for (std::list<std::string>::iterator list_iter = params.begin(); list_iter != params.end(); list_iter++)
 	{
 		

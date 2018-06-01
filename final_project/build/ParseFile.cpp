@@ -5,6 +5,7 @@
 #include <string>
 #include <queue>
 #include <sstream>
+#include <boost\algorithm\string.hpp>
 
 #define  DLL  "#define ENCLAVE_FILE _T ("    "\""   ENCLAVE_DLL "\""           ")\n";
 #define TEMP_FILE  SOLUTION_DIR "secure_application\\Source.cpp"
@@ -73,18 +74,20 @@ void findWordInLine(std::string line, int lineNum, std::ofstream* tempFile)
 			}
 			if (c == '(')
 			{
-				if (line.at(len - 1) != ';')
+				if (line.at(len - 1) != ';' && !isCondition(line))
 				{
 					func_name = getFuncName(line);
-					if (func_name != "") {
+					if (func_name != ""  ) {
 						isFunc = true;
 					}
 				}
-				else
+				else 
 				{
-					std::string name = getFuncName(line);
-
-					if (func_name.compare(name) == 0 && q.size() > 0 && name != "" && func_name != "" && isFunc) {
+					std::string name = getFuncName(line);	
+					std::cout << "name:" << name << "\n";
+					std::cout << "func_name:" << func_name << "\n";
+					//if (func_name.compare(name) == 0  && q.size() > 0 && name != "" && func_name != "" && isFunc) {
+					if (boost::find_first(line,func_name+"(") && q.size() > 0 && name != "" && func_name != "" && isFunc) {
 						isRecursion = true;
 						std::cout <<name<< " isRecursion" << std::endl;
 						recursion_func.push_back(func_name);
