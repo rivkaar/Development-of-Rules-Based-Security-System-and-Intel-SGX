@@ -1,42 +1,30 @@
 #include "parsefile.h"
+#include "RecursionHandle.h"
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <queue>
+#include <sstream>
+#include <boost\algorithm\string.hpp>
 
-std::string TEMP_FILE = "C:/Users/user/Desktop/tempFile.c";
+//#define  DLL  "#define ENCLAVE_FILE _T ("    "\""   ENCLAVE_DLL "\""           ")\n";
+//#define TEMP_FILE  SOLUTION_DIR "secure_application\\Source.cpp"
+
+std::string TEMP_FILE = "C:/Users/User/Desktop/tempFile.c";
+
 bool g_isComment = false;
+bool isFunc = false;
 bool isMain = false;
-bool replaceSouceFile = false;
+bool isRecursion = false;
+std::string func_name;
 std::queue<char> q;
-std::list<WordData*> g_wordsList;
+std::list<std::string> recursion_func;
+std::string int_wrapper;
+int counter = 0;
 
-
-WordData::WordData(int lineNum, int charNum, std::string word)
-{
-	WordData::lineNum = lineNum;
-	WordData::charNum = charNum;
-	WordData::word = word;
-}
-
-int WordData::getLineNum()
-{
-	return lineNum;
-}
-int WordData::getCharNum()
-{
-	return charNum;
-}
-std::string WordData::getWord()
-{
-	return word;
-}
-
-/*The function findWordInLine scans the file 
-  and searches for suspicious actions that appear in the dictionary */
 void findWordInLine(std::string line, int lineNum, std::ofstream* tempFile)
 {
-
+	scanAndMap(line);
 	std::string str = "";
 	std::string newLine = "";
 	bool isSuspiciousFuncFound = false;
@@ -62,7 +50,7 @@ void findWordInLine(std::string line, int lineNum, std::ofstream* tempFile)
 			if (isMain && c == '}')
 			{
 				q.pop();
-				if (isMain && q.size() == 0) //add lines in the main for destroy the enclave
+				if (isMain && q.size() == 0)
 				{
 					*tempFile << "	if (SGX_SUCCESS != sgx_destroy_enclave(eid))\n";
 					*tempFile << "	{\n";
@@ -74,7 +62,7 @@ void findWordInLine(std::string line, int lineNum, std::ofstream* tempFile)
 			else if (isMain && c == '{')
 			{
 				q.push('{');
-				if (q.size() == 1) { //add lines in the main for create the enclave
+				if (q.size() == 1) {
 					*tempFile << line + "\n";
 					*tempFile << "    sgx_status_t res = SGX_SUCCESS;\n";
 					*tempFile << "	// Create the Enclave with above launch token.\n";
@@ -86,22 +74,65 @@ void findWordInLine(std::string line, int lineNum, std::ofstream* tempFile)
 				}
 
 			}
-
-			if (g_dictionary.count(str) > 0) //Comparing the str with the dictionary
+			if (c == '(')
 			{
-				int charNum = i - str.length();
-				WordData* data = new WordData(lineNum, charNum, str);
-				g_wordsList.push_back(data);
-				replaceLineInTempFile(line, str, charNum, tempFile);
-				isSuspiciousFuncFound = true;
-				replaceSouceFile = true;
-				return;
+				if (line.at(len - 1) != ';' && !isCondition(line))
+				{
+					func_name = getFuncName(line);
+					if (func_name != "") {
+						isFunc = true;
+					}
+				}
+				else
+				{
+					std::string name = isRecursive(line, recursion_func);
+
+					//if (func_name.compare(name) == 0  && q.size() > 0 && name != "" && func_name != "" && isFunc) {
+					if (boost::find_first(line, func_name + "(") && q.size() > 0 && func_name != "" && isFunc) {
+						isRecursion = true;
+						std::cout << func_name << " isRecursion" << std::endl;
+						recursion_func.push_back(func_name);
+					}
+
+					else if (name != "") {
+						bool contains_equal = false;
+						//if the function in recursive list replace to enclaveRecursion
+						std::cout << line << " need to replace" << std::endl;
+						if (line.find('=') != std::string::npos)
+						{
+							contains_equal = true;
+						}
+						std::string call_func = getCallFunc(line, name);
+						replaceToEnclaveRecursion(line, tempFile, contains_equal, call_func);
+						std::list<std::string> params = getFuncParams(call_func);
+						counter++;
+						int_wrapper += addFunctionCallInWrapper(name, params, counter);
+						isSuspiciousFuncFound = true;
+						return;
+					}
+
+				}
+
 			}
 			if (str.compare("main") == 0)
 			{
 				isMain = true;
-
 			}
+			if (c == '{' && !isMain && isFunc) {
+				q.push('{');
+			}
+			if (c == '}' && !isMain && isFunc) {
+				q.pop();
+			}
+
+			if (g_dictionary.count(str) > 0)
+			{
+				int charNum = i - str.length();
+				replaceLineInTempFile(line, str, charNum, tempFile);
+				isSuspiciousFuncFound = true;
+				return;
+			}
+
 		}
 		else if (c == '#')
 		{
@@ -141,21 +172,33 @@ void findWordInLine(std::string line, int lineNum, std::ofstream* tempFile)
 
 void parseFile(std::map<std::string, std::string> dictionary, std::string sourceFilePath)
 {
+	//replacing vs backward trailing slash by forward slash
+	/*std::string dll = DLL;
+	std::string tempfilePath = TEMP_FILE;
+	std::replace(dll.begin(), dll.end(), '\\', '/');
+	std::replace(tempfilePath.begin(), tempfilePath.end(), '\\', '/');*/
+
 	std::ifstream sourceFile;
 	std::ofstream tempFile;
+	//tempFile.open(tempfilePath);
+	////////////
 	tempFile.open(TEMP_FILE);
+	/////////////////
+
 	sourceFile.open(sourceFilePath);
 	std::string line;
 	int lineNum = 0;
 	std::string str = "#pragma check_stack(off)\n";
-	str += "#include \"stdafx.h\"\n";
 	str += "#include \"sgx_urts.h\"\n";
-	str += "#include \"SecureFunctions_u.h\"\n";
+	str += "#include \"secure_functions_u.h\"\n";
 	str += "#include <tchar.h>\n";
 	str += "#include <stdint.h>\n";
 	str += "#include <stdio.h>\n";
 	str += "#include <stdlib.h>\n";
-	str += "#define ENCLAVE_FILE _T(\"SecureFunctions.signed.dll\")\n";
+	//str += dll;
+	str += "\nint counter = 0;\n";//for the case in wrapper function
+	str += "\nint* outRes = new int;\n";
+	str += "\nint int_wrapper();\n ";//Statement of function
 	str += "using namespace std;\n";
 	str += "/* OCall functions */\n";
 	str += "void ocall_print_string(const char *str)\n{\n";
@@ -171,6 +214,11 @@ void parseFile(std::map<std::string, std::string> dictionary, std::string source
 	str += "	return ret;\n}\n";
 	str += "sgx_enclave_id_t eid;\n\n";
 
+	int_wrapper = "int int_wrapper(){ \n";
+	int_wrapper += "	counter++; \n";
+	int_wrapper += "	switch (counter) \n";
+	int_wrapper += "	{\n";
+
 	if (sourceFile.is_open() && tempFile.is_open())
 	{
 		tempFile << str;
@@ -179,6 +227,10 @@ void parseFile(std::map<std::string, std::string> dictionary, std::string source
 			findWordInLine(line, lineNum, &tempFile);
 			lineNum++;
 		}
+		int_wrapper += "	default:break;\n";
+		int_wrapper += "	}\n\treturn 0;\n";
+		int_wrapper += "}\n";
+		tempFile << int_wrapper;
 
 	}
 
@@ -195,22 +247,18 @@ void parseFile(std::map<std::string, std::string> dictionary, std::string source
 	}
 	sourceFile.close();
 	tempFile.close();
-
-	copyToSourceFile("C:/Users/user/Desktop/sourceFile.c"); //Copies all content back to the source file
 }
 
 
-void deleteLists()
-{
-	for (std::list<WordData*>::iterator list_iter = g_wordsList.begin(); list_iter != g_wordsList.end(); list_iter++)
-	{
-		delete *list_iter;
-	}
-}
+//void deleteLists()
+//{
+//	for (std::list<WordData*>::iterator list_iter = g_wordsList.begin(); list_iter != g_wordsList.end(); list_iter++)
+//	{
+//		delete *list_iter;
+//	}
+//}
 
-/* The function getNewCallFunction creates a new call of enclave function 
-   (instead of the suspicious function)
-*/
+
 std::string getNewCallFunction(std::string oldFunctionName, std::list<std::string> params)
 {
 	std::string newCallFunc = "";
@@ -222,16 +270,15 @@ std::string getNewCallFunction(std::string oldFunctionName, std::list<std::strin
 	}
 	newCallFunc.pop_back();
 	newCallFunc += ')';
-	//printf("%s\n", newCallFunc);
 	return newCallFunc;
 }
-/* the function getFuncParams finds all the prameters that the function accepts */
+
 
 std::list<std::string> getFuncParams(std::string func)
 {
 	std::queue<char> q;
 	std::list<std::string> params;
-	std::string p;
+	std::string p = "";
 	for (int i = 0; i < func.length(); i++)
 	{
 		char c = func.at(i);
@@ -243,10 +290,15 @@ std::list<std::string> getFuncParams(std::string func)
 			}
 			q.push(c);
 		}
-		else if (c == ')')
+		else if (c == ')' && q.size() == 1)
 		{
 			params.push_back(p);
 			q.pop();
+		}
+		else if (c == ')' && q.size() > 1)
+		{
+			q.pop();
+			p += c;
 		}
 		else if (c == ',')
 		{
@@ -286,15 +338,42 @@ void replaceLineInTempFile(std::string line, std::string str, int charNum, std::
 		std::string num2 = "";
 		std::string result = "";
 		std::string type = "";
+		std::string s = "";
+		std::string newLine = "";
 		char c;
-		bool isAfterEqualSign = false, isAfterNum1 = false, isAfterType = false;
+		int counter = 0;
+		bool isAfterEqualSign = false, isAfterNum1 = false, isAfterType = false, isPrintf = false;
 
 		for (int i = 0; i < line.length(); i++)
 		{
 			c = line.at(i);
-			if (!isAfterType)
+			if (c != ' ')
+				s += line.at(i);
+			if (!isAfterType && !isPrintf)
 				type += c;
-			if (c == ' ' && !isAfterEqualSign)
+			if (s.compare("printf") == 0)
+			{
+				newLine += s;
+				isPrintf = true;
+				continue;
+			}
+			if (isPrintf)
+			{
+				if (c == ',')
+					counter += 1;
+				if (counter == 0)
+					newLine += c;
+				else if (counter == 1) {
+					num1 += c;
+					result = "";
+					type = "";
+				}
+				else if (counter == 2)
+					num2 += c;
+				else if (counter > 2)
+					break;
+			}
+			if (c == ' ' && !isAfterEqualSign && !isPrintf)
 			{
 				isAfterType = true;
 				continue;
@@ -305,7 +384,7 @@ void replaceLineInTempFile(std::string line, std::string str, int charNum, std::
 					result = type;
 					type = "";
 				}
-					
+
 				isAfterEqualSign = true;
 				continue;
 			}
@@ -317,21 +396,27 @@ void replaceLineInTempFile(std::string line, std::string str, int charNum, std::
 			else if (c == ';')
 				break;
 
-			if (isAfterEqualSign && !isAfterNum1 && c != '/')
+			if (isAfterEqualSign && !isAfterNum1 && c != '/' && !isPrintf)
 				num1 += c;
 
-			if (isAfterNum1 && c != ';')
+			if (isAfterNum1 && c != ';' && !isPrintf)
 				num2 += c;
 
-			if (isAfterType && !isAfterEqualSign && !isAfterNum1)
+			if (isAfterType && !isAfterEqualSign && !isAfterNum1 && !isPrintf)
 				result += c;
 		}
-		std::string newLine = "";
-		newLine += "enclaveDivideByZero(eid," + num1 + "," + num2 +  "," + result +");\n";
+		if (isPrintf) {
+			newLine += num1 + num2;
+			newLine += ", enclaveDivideByZero(eid" + num1 + num2 + "," + "int result" + "));\n";
+		}
+		else {
+			newLine += "enclaveDivideByZero(eid," + num1 + "," + num2 + "," + result + ");\n";
+		}
 		*tempFile << "//" + line + "\n";
 		if (type != "")
 			*tempFile << type + result + "\n";
 		*tempFile << newLine;
+
 	}
 	else if (str.compare("int32_t") == 0)
 	{
@@ -375,37 +460,3 @@ void replaceLineInTempFile(std::string line, std::string str, int charNum, std::
 	}
 }
 
-void copyToSourceFile(std::string sourceFilePath)
-{ 
-	if (replaceSouceFile)
-	{
-		std::ifstream tempFile;
-		std::ofstream sourceFile;
-		tempFile.open(TEMP_FILE);
-		sourceFile.open(sourceFilePath);
-		std::string line;
-		if (sourceFile.is_open() && tempFile.is_open())
-		{
-			while (getline(tempFile, line))
-			{
-				sourceFile << line + "\n";
-			}
-		}
-		else
-		{
-			if (sourceFile.is_open())
-			{
-				std::cout << "Unable to open temp file";
-			}
-			else
-			{
-				std::cout << "Unable to open source file";
-			}
-		}
-		sourceFile.close();
-		tempFile.close();
-	}
-	else
-		std::cout << "No suspicious function found in this file";
-
-}

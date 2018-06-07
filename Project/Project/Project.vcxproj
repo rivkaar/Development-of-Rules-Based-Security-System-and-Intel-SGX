@@ -114,11 +114,13 @@
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="ParseFile.cpp" />
     <ClCompile Include="Dictionary.cpp" />
+    <ClCompile Include="RecursionHandle.cpp" />
     <ClCompile Include="SearchExe.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Dictionary.h" />
     <ClInclude Include="ParseFile.h" />
+    <ClInclude Include="RecursionHandle.h" />
     <ClInclude Include="SearchExe.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
