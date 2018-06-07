@@ -87,26 +87,38 @@ std::string getFuncName(std::string line) {
 	return func_name;
 }
 
-bool isRecursive(std::string name, std::list<std::string> recursion_func) {
-	bool exists = std::find(std::begin(recursion_func), std::end(recursion_func), name) != std::end(recursion_func);
-	return exists;
-}																			
+std::string isRecursive(std::string line, std::list<std::string> recursion_func) {
+	//bool exists = std::find(std::begin(recursion_func), std::end(recursion_func), name) != std::end(recursion_func);
+	bool exists = false;
+	for (std::list<std::string>::iterator list_iter = recursion_func.begin(); list_iter != recursion_func.end(); list_iter++)
+	{
+		if (line.find(*list_iter) != std::string::npos)
+			exists = true;
+		if (exists)
+			return *list_iter;
+	}
+	return "";
+}
 
-void replaceToEnclaveRecursion(std::string line, std::ofstream* tempFile ,bool contains_equal) {
-	std::string replacement_lines="";
+void replaceToEnclaveRecursion(std::string line, std::ofstream* tempFile, bool contains_equal, std::string call_func) {
+	std::string replacement_lines = "";
 	//These lines are required in order to get a return value from inside the enclave
 	replacement_lines = "\t*outRes = 0;\n\t";
 	//Replace unsecure recursive function with a secure recursive function
 	replacement_lines += "enclaveRecursive(eid,(int*)outRes,sizeof(int));\n";
-	if (contains_equal)
+	if (line.find("printf") != std::string::npos)
+		replacement_lines += replacePrintf(line, call_func) + "\n";
+	else if (contains_equal)
 	{
 		//here we need to get the variable from the right of the line
 		std::string assignment_variable;
 		std::istringstream g(line);
-		std::getline(g, assignment_variable, '='); 
+		std::getline(g, assignment_variable, '=');
 		//in case the recursion return value was assigned to to a variable 
-		replacement_lines += assignment_variable + "= *outRes;\t//" + line + "\n";
+		replacement_lines += assignment_variable + "= *outRes;\n";
 	}
+
+	*tempFile << "//" + line + "\n";
 	*tempFile << replacement_lines;
 
 }
@@ -129,9 +141,31 @@ std::string addFunctionCallInWrapper(std::string funcName, std::list<std::string
 		}
 	}
 
-	str.pop_back();
+	if (str.find(',') != std::string::npos)
+		str.pop_back();
 	str += ");break;\n";
 	return str;
 }
 
+std::string getCallFunc(std::string line, std::string name) {
+	std::string copy = line;
+	std::size_t pos = copy.find(name);
+	std::string call_func = copy.substr(pos, copy.length());
+	pos = line.find("printf");
+	if (pos != std::string::npos) {
+		pos = call_func.find(',');
+		call_func = call_func.substr(pos, call_func.length());
+		pos = call_func.find(name);
+		call_func = call_func.substr(pos, call_func.length());
+	}
 
+	pos = call_func.find(')');
+	call_func = call_func.substr(0, pos + 1);
+	std::cout << " substr: " << call_func << std::endl;
+	return call_func;
+}
+
+std::string replacePrintf(std::string line, std::string call_func) {
+	boost::replace_all(line, call_func, "*outRes");
+	return line;
+}

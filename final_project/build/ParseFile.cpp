@@ -77,22 +77,22 @@ void findWordInLine(std::string line, int lineNum, std::ofstream* tempFile)
 				if (line.at(len - 1) != ';' && !isCondition(line))
 				{
 					func_name = getFuncName(line);
-					if (func_name != ""  ) {
+					if (func_name != "") {
 						isFunc = true;
 					}
 				}
-				else 
+				else
 				{
-					std::string name = getFuncName(line);	
-					std::cout << "name:" << name << "\n";
-					std::cout << "func_name:" << func_name << "\n";
+					std::string name = isRecursive(line, recursion_func);
+
 					//if (func_name.compare(name) == 0  && q.size() > 0 && name != "" && func_name != "" && isFunc) {
-					if (boost::find_first(line,func_name+"(") && q.size() > 0 && name != "" && func_name != "" && isFunc) {
+					if (boost::find_first(line, func_name + "(") && q.size() > 0 && func_name != "" && isFunc) {
 						isRecursion = true;
-						std::cout <<name<< " isRecursion" << std::endl;
+						std::cout << func_name << " isRecursion" << std::endl;
 						recursion_func.push_back(func_name);
 					}
-					else if (isRecursive(name, recursion_func)) {
+
+					else if (name != "") {
 						bool contains_equal = false;
 						//if the function in recursive list replace to enclaveRecursion
 						std::cout << line << " need to replace" << std::endl;
@@ -100,8 +100,9 @@ void findWordInLine(std::string line, int lineNum, std::ofstream* tempFile)
 						{
 							contains_equal = true;
 						}
-						replaceToEnclaveRecursion(line, tempFile, contains_equal);
-						std::list<std::string> params = getFuncParams(line);
+						std::string call_func = getCallFunc(line, name);
+						replaceToEnclaveRecursion(line, tempFile, contains_equal, call_func);
+						std::list<std::string> params = getFuncParams(call_func);
 						counter++;
 						int_wrapper += addFunctionCallInWrapper(name, params, counter);
 						isSuspiciousFuncFound = true;
