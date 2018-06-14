@@ -142,6 +142,8 @@ std::string getParams(std::list<std::string> params) {
 }
 std::string replaceSignature(std::string signature)
 {
+	boost::replace_all(signature, "int32_t", "int");
+	boost::replace_all(signature, "int64_t", "int");
 	boost::replace_all(signature, getFuncName(signature), " tailRecursion");
 	return boost::replace_all_copy(signature, ")", " ,int acc = 1)");
 }
@@ -171,22 +173,23 @@ std::string replaceTotTialCall(std::string recursiveCall)
 	boost::split(substr, recursiveCall, boost::is_any_of(oper));
 	boost::split(substr, substr[0], boost::is_any_of(" "));
 	param = substr[1];
+	boost::replace_all(recursiveCall, "(int64_t)", "");
+	boost::replace_all(recursiveCall, "result =", "return ");
+	boost::replace_all(recursiveCall, "))", ", acc");
+	boost::replace_all(recursiveCall, "((", "(");
 	std::istringstream f(operators);
-	boost::replace_all(recursiveCall, ")", " , acc" + oper + param + ")");
+	boost::replace_all(recursiveCall, "v1", variableMap["v1"]);
 	boost::replace_all(recursiveCall, "_factorial", "tailRecursion");
-	boost::replace_first(recursiveCall, param, "");
-	boost::replace_first(recursiveCall, oper, "");
+	boost::replace_first(recursiveCall, ";", ");");
 	return recursiveCall;
-
-
 }
 
 std::string getCallFunc(std::string line, std::string name) {
 	std::string copy = line;
 	std::size_t pos = copy.find(name);
 	std::string call_func = copy.substr(pos, copy.length());
-	pos = line.find("printf");
-	if (pos != std::string::npos) {
+
+	if (call_func.find("%") != std::string::npos && line.find("printf") != std::string::npos) {
 		pos = call_func.find(',');
 		call_func = call_func.substr(pos, call_func.length());
 		pos = call_func.find(name);
@@ -214,4 +217,8 @@ int getPos(std::fstream* securefunctionFile) {
 
 	}
 	return pos_line;
+}
+std::string replaceCondition(std::string conditionLine) {
+	boost::replace_all(conditionLine, "v1", variableMap["v1"]);
+	return conditionLine;
 }

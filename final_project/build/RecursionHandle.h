@@ -18,3 +18,4 @@ std::string replaceStopCondition(std::string line);
 std::string replaceTotTialCall(std::string recursiveCall);
 std::string getParams(std::list<std::string> params);
 int getPos(std::fstream* securefunctionFile);
+std::string replaceCondition(std::string conditionLine);

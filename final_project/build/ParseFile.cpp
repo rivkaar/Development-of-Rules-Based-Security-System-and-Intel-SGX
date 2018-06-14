@@ -89,25 +89,22 @@ void findWordInLine(std::string line, int lineNum, std::ofstream* tempFile, std:
 				{
 					std::string name = isRecursive(line, recursion_func);
 
-					//if (func_name.compare(name) == 0  && q.size() > 0 && name != "" && func_name != "" && isFunc) {
 					if (boost::find_first(line, func_name + "(") && q.size() > 0 && func_name != "" && isFunc) {
 						isRecursion = true;
-						std::cout << func_name << " isRecursion" << std::endl;
 						recursion_func.push_back(func_name);
 						//lines to enable tail recursion
 						tail_recursion = "\n" + replaceSignature(signatureLine) + "\n";
-						tail_recursion += conditionLine + "\n{";
-						tail_recursion += "\n" + replaceStopCondition(signatureLine) + "\n" + "}";
+						tail_recursion += replaceCondition(conditionLine) + "\n{";
 						//replacing normal recursive call to tail recursive call
 						tail_recursion += "\n" + replaceTotTialCall(line) + "\n}";
-						//std::cout << "tail_recursion: " << tail_recursion << std::endl; 
-
+						tail_recursion += "\n" + replaceStopCondition(signatureLine) + "\n" + "}";
 
 						/*int pos_line = getPos(securefunctionsFile);
 						(*securefunctionsFile).seekp(pos_line);
 						std::cout << "pos: " << pos_line << std::endl;*/
-						//(*securefunctionsFile).seekp(630);
-						//(*securefunctionsFile) << tail_recursion;
+						(*securefunctionsFile).seekp(628);
+						(*securefunctionsFile) << tail_recursion;
+						break;
 					}
 
 					else if (name != "") {
@@ -119,7 +116,6 @@ void findWordInLine(std::string line, int lineNum, std::ofstream* tempFile, std:
 							contains_equal = true;
 						}
 						std::string call_func = getCallFunc(line, name);
-						//replaceToEnclaveRecursion(line, tempFile, contains_equal, call_func);
 						std::list<std::string> params = getFuncParams(call_func);
 						replaceToEnclaveRecursion(line, tempFile, contains_equal, call_func, getParams(params));
 						isSuspiciousFuncFound = true;
