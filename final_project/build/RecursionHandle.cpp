@@ -12,7 +12,7 @@
 std::map<std::string, std::string> variableMap;
 
 
-void addMapEntry(std::string key,std::string value)
+void addMapEntry(std::string key, std::string value)
 {
 	variableMap[key] = value;
 }
@@ -23,7 +23,7 @@ void scanAndMap(std::string line)
 	std::vector<std::string> params;
 	std::string param, s, key, value, temp;
 	//in case there is more than one variable defined in the line
-	boost::split(params, line,boost::is_any_of(","));
+	boost::split(params, line, boost::is_any_of(","));
 
 	for (size_t i = 0; i < params.size(); i++)
 	{
@@ -31,7 +31,6 @@ void scanAndMap(std::string line)
 
 		if (param.find('=') != std::string::npos)
 		{
-			std::cout << "line " << param << "\n";
 			std::istringstream g(param);
 			std::getline(g, s, '=');
 			temp = s;
@@ -59,7 +58,7 @@ bool isCondition(std::string line)
 	while (std::getline(f, condition, ' ')) {
 		if (boost::find_first(line, condition)) return true;
 	}
-	
+
 	return false;
 }
 
@@ -73,17 +72,14 @@ std::string getFuncName(std::string line) {
 	if (s.find('=') != std::string::npos)
 	{
 		std::istringstream g(s);
-		std::cout << "line with eq" << s << std::endl;
 		while (std::getline(g, s, '=')) {}
-		std::cout << "line after removing eq" << s << std::endl;
 	}
 	std::istringstream a(s);
 	std::getline(a, s, ' ');
 	std::getline(a, s, ' ');
 	func_name = s;
 	func_name.erase(std::remove(func_name.begin(), func_name.end(), '\t'), func_name.end());
-	if (func_name != "")
-		std::cout << " after get func name: " << func_name << std::endl;
+	//if (func_name != "")
 	return func_name;
 }
 
@@ -100,12 +96,12 @@ std::string isRecursive(std::string line, std::list<std::string> recursion_func)
 	return "";
 }
 
-void replaceToEnclaveRecursion(std::string line, std::ofstream* tempFile, bool contains_equal, std::string call_func) {
+void replaceToEnclaveRecursion(std::string line, std::ofstream* tempFile, bool contains_equal, std::string call_func, std::string params) {
 	std::string replacement_lines = "";
 	//These lines are required in order to get a return value from inside the enclave
 	replacement_lines = "\t*outRes = 0;\n\t";
 	//Replace unsecure recursive function with a secure recursive function
-	replacement_lines += "enclaveRecursive(eid,(int*)outRes,sizeof(int));\n";
+	replacement_lines += "enclaveRecursive(eid,(int*)outRes,sizeof(int)" + params + ");\n";
 	if (line.find("printf") != std::string::npos)
 		replacement_lines += replacePrintf(line, call_func) + "\n";
 	else if (contains_equal)
@@ -122,29 +118,67 @@ void replaceToEnclaveRecursion(std::string line, std::ofstream* tempFile, bool c
 	*tempFile << replacement_lines;
 
 }
-std::string addFunctionCallInWrapper(std::string funcName, std::list<std::string> params, int counter) {
+
+
+std::string getParams(std::list<std::string> params) {
 	std::string str;
-	str += "\t\tcase ";
-	str += std::to_string(counter);
-	str += ": return " + funcName + "(";
+
 	for (std::list<std::string>::iterator list_iter = params.begin(); list_iter != params.end(); list_iter++)
 	{
-		
+
 		if (variableMap.find(*list_iter) != variableMap.end())
 		{
-			str += (variableMap[*list_iter] + ",");
+			str += "," + (variableMap[*list_iter] + ",");
 		}
 		else
 		{
 
-			str += (*list_iter + ",");
+			str += "," + (*list_iter + ",");
 		}
 	}
-
 	if (str.find(',') != std::string::npos)
 		str.pop_back();
-	str += ");break;\n";
 	return str;
+}
+std::string replaceSignature(std::string signature)
+{
+	boost::replace_all(signature, getFuncName(signature), " tailRecursion");
+	return boost::replace_all_copy(signature, ")", " ,int acc = 1)");
+}
+std::string replaceStopCondition(std::string line)
+{
+	return "\t\treturn acc;";
+
+}
+
+std::string replaceTotTialCall(std::string recursiveCall)
+{
+	std::string operators = "+ - : * ";
+	std::string oper = "", param = "";
+	std::vector<std::string> substr;
+	//should not be hardcoded
+	boost::split(substr, recursiveCall, boost::is_any_of("("));
+	/*for (int i = 0; i <substr[0].size(); i++)
+	{
+	if (operators.find(substr[0][i]) != std::string::npos)
+	{
+	oper = substr[0][i];
+	std::cout << oper << "\n";
+
+	}
+	}*/
+	oper = "*";
+	boost::split(substr, recursiveCall, boost::is_any_of(oper));
+	boost::split(substr, substr[0], boost::is_any_of(" "));
+	param = substr[1];
+	std::istringstream f(operators);
+	boost::replace_all(recursiveCall, ")", " , acc" + oper + param + ")");
+	boost::replace_all(recursiveCall, "_factorial", "tailRecursion");
+	boost::replace_first(recursiveCall, param, "");
+	boost::replace_first(recursiveCall, oper, "");
+	return recursiveCall;
+
+
 }
 
 std::string getCallFunc(std::string line, std::string name) {
@@ -161,11 +195,23 @@ std::string getCallFunc(std::string line, std::string name) {
 
 	pos = call_func.find(')');
 	call_func = call_func.substr(0, pos + 1);
-	std::cout << " substr: " << call_func << std::endl;
 	return call_func;
 }
 
 std::string replacePrintf(std::string line, std::string call_func) {
 	boost::replace_all(line, call_func, "*outRes");
 	return line;
+}
+int getPos(std::fstream* securefunctionFile) {
+	int pos_line;
+	std::string line;
+	while (getline(*securefunctionFile, line))
+	{
+		if (line.find("tailRecursion") != std::string::npos) {
+			pos_line = (*securefunctionFile).tellg();
+			std::cout << "found! line: " << pos_line << std::endl;
+		}
+
+	}
+	return pos_line;
 }

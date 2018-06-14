@@ -14,13 +14,14 @@ bool g_isComment = false;
 bool isFunc = false;
 bool isMain = false;
 bool isRecursion = false;
-std::string func_name;
+bool isStopCondition = false;
+std::string func_name, signatureLine, returnLine, conditionLine;
 std::queue<char> q;
 std::list<std::string> recursion_func;
-std::string int_wrapper;
+std::string tail_recursion = "";
 int counter = 0;
 
-void findWordInLine(std::string line, int lineNum, std::ofstream* tempFile)
+void findWordInLine(std::string line, int lineNum, std::ofstream* tempFile, std::fstream* securefunctionsFile)
 {
 	scanAndMap(line);
 	std::string str = "";
@@ -74,11 +75,14 @@ void findWordInLine(std::string line, int lineNum, std::ofstream* tempFile)
 			}
 			if (c == '(')
 			{
+				std::string signature;
 				if (line.at(len - 1) != ';' && !isCondition(line))
 				{
 					func_name = getFuncName(line);
 					if (func_name != "") {
 						isFunc = true;
+						signatureLine = line;
+
 					}
 				}
 				else
@@ -90,21 +94,34 @@ void findWordInLine(std::string line, int lineNum, std::ofstream* tempFile)
 						isRecursion = true;
 						std::cout << func_name << " isRecursion" << std::endl;
 						recursion_func.push_back(func_name);
+						//lines to enable tail recursion
+						tail_recursion = "\n" + replaceSignature(signatureLine) + "\n";
+						tail_recursion += conditionLine + "\n{";
+						tail_recursion += "\n" + replaceStopCondition(signatureLine) + "\n" + "}";
+						//replacing normal recursive call to tail recursive call
+						tail_recursion += "\n" + replaceTotTialCall(line) + "\n}";
+						//std::cout << "tail_recursion: " << tail_recursion << std::endl; 
+
+
+						/*int pos_line = getPos(securefunctionsFile);
+						(*securefunctionsFile).seekp(pos_line);
+						std::cout << "pos: " << pos_line << std::endl;*/
+						//(*securefunctionsFile).seekp(630);
+						//(*securefunctionsFile) << tail_recursion;
 					}
 
 					else if (name != "") {
 						bool contains_equal = false;
 						//if the function in recursive list replace to enclaveRecursion
-						std::cout << line << " need to replace" << std::endl;
+						//std::cout << line << " need to replace" << std::endl;
 						if (line.find('=') != std::string::npos)
 						{
 							contains_equal = true;
 						}
 						std::string call_func = getCallFunc(line, name);
-						replaceToEnclaveRecursion(line, tempFile, contains_equal, call_func);
+						//replaceToEnclaveRecursion(line, tempFile, contains_equal, call_func);
 						std::list<std::string> params = getFuncParams(call_func);
-						counter++;
-						int_wrapper += addFunctionCallInWrapper(name, params, counter);
+						replaceToEnclaveRecursion(line, tempFile, contains_equal, call_func, getParams(params));
 						isSuspiciousFuncFound = true;
 						return;
 					}
@@ -122,6 +139,17 @@ void findWordInLine(std::string line, int lineNum, std::ofstream* tempFile)
 			if (c == '}' && !isMain && isFunc) {
 				q.pop();
 			}
+			if (isFunc  && isStopCondition && boost::find_first(line, "return"))
+			{
+				returnLine = line;
+				isStopCondition = false;
+			}
+
+			if (isFunc && boost::find_first(line, "if"))
+			{
+				conditionLine = line;
+
+			}
 
 			if (g_dictionary.count(str) > 0)
 			{
@@ -130,7 +158,7 @@ void findWordInLine(std::string line, int lineNum, std::ofstream* tempFile)
 				isSuspiciousFuncFound = true;
 				return;
 			}
-		
+
 		}
 		else if (c == '#')
 		{
@@ -173,13 +201,18 @@ void parseFile(std::map<std::string, std::string> dictionary, std::string source
 	//replacing vs backward trailing slash by forward slash
 	std::string dll = DLL;
 	std::string tempfilePath = TEMP_FILE;
+	std::string securefunctionsPath = "C://Users//User//Desktop//final_project//build//secure_functions//secure_functions.cpp";
+
 	std::replace(dll.begin(), dll.end(), '\\', '/');
 	std::replace(tempfilePath.begin(), tempfilePath.end(), '\\', '/');
 
 	std::ifstream sourceFile;
 	std::ofstream tempFile;
+	std::fstream securefunctionsFile;
+
 	tempFile.open(tempfilePath);
 	sourceFile.open(sourceFilePath);
+	securefunctionsFile.open(securefunctionsPath, std::fstream::in | std::fstream::out);
 	std::string line;
 	int lineNum = 0;
 	std::string str = "#pragma check_stack(off)\n";
@@ -190,9 +223,7 @@ void parseFile(std::map<std::string, std::string> dictionary, std::string source
 	str += "#include <stdio.h>\n";
 	str += "#include <stdlib.h>\n";
 	str += dll;
-	str += "\nint counter = 0;\n";//for the case in wrapper function
 	str += "\nint* outRes = new int;\n";
-	str += "\nint int_wrapper();\n ";//Statement of function
 	str += "using namespace std;\n";
 	str += "/* OCall functions */\n";
 	str += "void ocall_print_string(const char *str)\n{\n";
@@ -208,29 +239,20 @@ void parseFile(std::map<std::string, std::string> dictionary, std::string source
 	str += "	return ret;\n}\n";
 	str += "sgx_enclave_id_t eid;\n\n";
 
-	int_wrapper = "int int_wrapper(){ \n";
-	int_wrapper += "	counter++; \n";
-	int_wrapper += "	switch (counter) \n";
-	int_wrapper += "	{\n";
-
-	if (sourceFile.is_open() && tempFile.is_open())
+	if (sourceFile.is_open() && tempFile.is_open() && securefunctionsFile.is_open())
 	{
 		tempFile << str;
 		while (getline(sourceFile, line))
 		{
-			findWordInLine(line, lineNum, &tempFile);
+			findWordInLine(line, lineNum, &tempFile, &securefunctionsFile);
 			lineNum++;
 		}
-		int_wrapper += "	default:break;\n";
-		int_wrapper += "	}\n\treturn 0;\n";
-		int_wrapper += "}\n";
-		tempFile << int_wrapper;
 
 	}
 
 	else
 	{
-		if (sourceFile.is_open())
+		if (sourceFile.is_open() && securefunctionsFile.is_open())
 		{
 			std::cout << "Unable to open temp file";
 		}
@@ -241,6 +263,7 @@ void parseFile(std::map<std::string, std::string> dictionary, std::string source
 	}
 	sourceFile.close();
 	tempFile.close();
+	securefunctionsFile.close();
 }
 
 

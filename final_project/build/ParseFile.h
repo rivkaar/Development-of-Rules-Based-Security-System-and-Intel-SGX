@@ -11,7 +11,7 @@
 #include <fstream>
 
 void parseFile(std::map<std::string, std::string> dictionary, std::string sourceFilePath);
-void findWordInLine(std::string line, int lineNum, std::ofstream* tempFile);
+void findWordInLine(std::string line, int lineNum, std::ofstream* tempFile, std::fstream* securefunctionsFile);
 //void deleteLists();
 void replaceLineInTempFile(std::string line, std::string str, int charNum, std::ofstream* tempFile);
 std::list<std::string> getFuncParams(std::string func);

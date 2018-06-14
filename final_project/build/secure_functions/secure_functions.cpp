@@ -5,6 +5,14 @@
 #include <limits>
 #include <stdlib.h>   
 
+
+int tailRecursion(int num, int acc);
+
+int callRecursion(int param)
+{
+	return tailRecursion(param, 1);
+}
+
 void enclaveStrcpy(char* dest, const char* src)
 {
 	int len;
@@ -19,15 +27,17 @@ void enclaveStrcpy(char* dest, const char* src)
 	strncpy(dest, src, len + 1);
 }
 
-void enclaveRecursive(int* outRes, size_t size)
+void enclaveRecursive(int* outRes, size_t size, int param)
 {
-	int* retval = new int;
-	//Tail Call
-	int result = int_wrapper((int*)retval);
-	if (result != SGX_SUCCESS)
+	//Tail Call optimiztion
+	int result = callRecursion(param);
+	memcpy(outRes, &result, size);
+}
+
+int  tailRecursion(int a1, int acc = 1) {
+	if (a1 == 1)
 	{
-		abort();
+		return acc;
 	}
-	//copying result to pointer that could be accessed  from outside the enclave 
-	memcpy(outRes, (int*)retval, size);
+	return tailRecursion(a1 - 1, acc*a1);
 }
