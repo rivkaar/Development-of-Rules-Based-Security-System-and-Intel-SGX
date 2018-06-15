@@ -1,5 +1,6 @@
 # Development-of-Rules-Based-Security-System-and-Intel-SGX
-In order to enable This project ,the following command must be done:
+The main project is placed in final_project directory.  
+In order to enable this project ,the following command must be done:
 
 Install retdec-cpp library on windows with visual studio 2015:
 
@@ -31,5 +32,5 @@ Note: Make sure that all paths on cmakeLists.txt are correct for your computer.
   -decompile  - The main project where all the system is defined  
   -secure_application  - Intel SGX untrusted app where parsing output is placed .    
   Has specail configuration to do calls to function that run in Enclave.  
-  -secure functions - Intel SGX trusted application where the secure functions of the project are placed     
+  -secure functions - Intel SGX trusted application where the secure functions for the project are placed     
  
