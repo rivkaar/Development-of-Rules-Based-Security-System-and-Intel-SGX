@@ -28,8 +28,8 @@ Note: Make sure that all paths on cmakeLists.txt are correct for your computer.
   retdec-cpp should now be installed in retdec-cpp/build/install.  
   
   The Solution contains three main projects:  
-  -decompile  - The main project where all the system is defined
-  -secure_application  - Intel SGX untrusted app where parsing output is placed .  
-  Has specail configuration to do calls to function that run in Enclave.
-  -secure functions - Intel SGX trusted application where the secure functions of the project are placed   
+  -decompile  - The main project where all the system is defined  
+  -secure_application  - Intel SGX untrusted app where parsing output is placed .    
+  Has specail configuration to do calls to function that run in Enclave.  
+  -secure functions - Intel SGX trusted application where the secure functions of the project are placed     
  
