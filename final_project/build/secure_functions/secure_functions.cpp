@@ -41,3 +41,19 @@ int  tailRecursion(int a1, int acc = 1) {
 	}
 	return tailRecursion(a1 - 1, acc*a1);
 }
+
+void enclaveDivideByZero(int num1, int num2, int* res, size_t size)
+{
+	int result;
+	if (num2 != 0)
+	{
+		result = num1 / num2;
+	}
+	else
+	{
+		result = 0;
+	}
+
+	memcpy(res, &result, size);
+
+}

@@ -352,7 +352,7 @@ void replaceLineInTempFile(std::string line, std::string str, int charNum, std::
 		std::string num2 = "";
 		std::string result = "";
 		std::string type = "";
-		std::string s = "";
+		std::string s = "", str = "";
 		std::string newLine = "";
 		char c;
 		int counter = 0;
@@ -367,7 +367,7 @@ void replaceLineInTempFile(std::string line, std::string str, int charNum, std::
 				type += c;
 			if (s.compare("printf") == 0)
 			{
-				newLine += s;
+				str += s;
 				isPrintf = true;
 				continue;
 			}
@@ -376,7 +376,7 @@ void replaceLineInTempFile(std::string line, std::string str, int charNum, std::
 				if (c == ',')
 					counter += 1;
 				if (counter == 0)
-					newLine += c;
+					str += c;
 				else if (counter == 1) {
 					num1 += c;
 					result = "";
@@ -420,11 +420,14 @@ void replaceLineInTempFile(std::string line, std::string str, int charNum, std::
 				result += c;
 		}
 		if (isPrintf) {
-			newLine += num1 + num2;
-			newLine += ", enclaveDivideByZero(eid" + num1 + num2 + "," + "int result" + "));\n";
+			newLine = "\t*outRes = 0;\n";
+			newLine += "\tenclaveDivideByZero(eid" + num1 + num2 + ", (int*)outRes, sizeof(int)" + ");\n";
+			newLine += "\t" + str + num1 + num2;
+			newLine += ", *outRes);\n";
 		}
 		else {
-			newLine += "enclaveDivideByZero(eid," + num1 + "," + num2 + "," + result + ");\n";
+			newLine = "*outRes = 0;\n";
+			newLine += "enclaveDivideByZero(eid" + num1 + num2 + ", (int*)outRes, sizeof(int)" + ");\n";
 		}
 		*tempFile << "//" + line + "\n";
 		if (type != "")
@@ -432,47 +435,4 @@ void replaceLineInTempFile(std::string line, std::string str, int charNum, std::
 		*tempFile << newLine;
 
 	}
-	else if (str.compare("int32_t") == 0)
-	{
-		int i;
-		char c;
-		int len = line.length();
-		std::string paramName = "";
-		bool isAfterEqualSign = false, isFunction = false;
-		for (i = charNum + 7; i < len; i++)
-		{
-			c = line.at(i);
-			if (c == '=')
-			{
-				isAfterEqualSign = true;
-				break;
-			}
-			else if (c == ';')
-			{
-				break;
-			}
-			else if (!isAfterEqualSign && c == '*')
-			{
-				*tempFile << line + "\n";
-				return;
-			}
-			else if (c == '(')
-			{
-				isFunction = true;
-			}
-		}
-		if (isFunction)
-		{
-			*tempFile << line + "\n";
-		}
-		else
-		{
-			std::string newLine = line.substr(0, i);
-			newLine += " = 0;\n";
-			*tempFile << newLine;
-		}
-	}
 }
-
-
-

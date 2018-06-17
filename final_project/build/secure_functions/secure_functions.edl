@@ -5,6 +5,8 @@ enclave {
         /* define ECALLs here. */
 		public void enclaveStrcpy([in, out, string] char* dest, [in, string] const char* src);
 		public void enclaveRecursive([in, out, size=size]int* res, size_t size);
+		public void enclaveDivideByZero(int num1,int num2,[in, out, size=size]int* res, size_t size);
+
 
     };
 
